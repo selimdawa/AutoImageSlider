@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.flatcode.autoimageslider.databinding.ImageSliderLayoutItemBinding
-import com.selimdawa.autoimageslider.SliderViewAdapter
+import com.selimdawa.autoimageslider.Adapter.SliderViewAdapter
 
 class SliderAdapterExample(private val context: Context) :
     SliderViewAdapter<SliderAdapterExample.SliderAdapterVH>() {
 
-    private var mSliderItems: MutableList<SliderItem> = ArrayList()
+    private var mSliderItems: MutableList<SliderItem> = mutableListOf()
 
     fun renewItems(sliderItems: MutableList<SliderItem>) {
         this.mSliderItems = sliderItems
@@ -20,8 +20,10 @@ class SliderAdapterExample(private val context: Context) :
     }
 
     fun deleteItem(position: Int) {
-        this.mSliderItems.removeAt(position)
-        notifyDataSetChanged()
+        if (position in mSliderItems.indices) {
+            this.mSliderItems.removeAt(position)
+            notifyDataSetChanged()
+        }
     }
 
     fun addItem(sliderItem: SliderItem) {
@@ -30,10 +32,11 @@ class SliderAdapterExample(private val context: Context) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup): SliderAdapterVH {
-        val binding = ImageSliderLayoutItemBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
+        return SliderAdapterVH(
+            ImageSliderLayoutItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
         )
-        return SliderAdapterVH(binding)
     }
 
     override fun onBindViewHolder(viewHolder: SliderAdapterVH, position: Int) {
@@ -44,7 +47,8 @@ class SliderAdapterExample(private val context: Context) :
             tvAutoImageSlider.textSize = 16f
             tvAutoImageSlider.setTextColor(Color.WHITE)
 
-            Glide.with(root.context).load(sliderItem.imageUrl).fitCenter().into(ivAutoImageSlider)
+            Glide.with(ivAutoImageSlider.context).load(sliderItem.imageUrl).fitCenter()
+                .into(ivAutoImageSlider)
 
             root.setOnClickListener {
                 Toast.makeText(context, "This is item in position $position", Toast.LENGTH_SHORT)
@@ -53,9 +57,7 @@ class SliderAdapterExample(private val context: Context) :
         }
     }
 
-    override fun getCount(): Int {
-        return mSliderItems.size
-    }
+    override fun getCount(): Int = mSliderItems.size
 
     class SliderAdapterVH(val binding: ImageSliderLayoutItemBinding) : ViewHolder(binding.root)
 }

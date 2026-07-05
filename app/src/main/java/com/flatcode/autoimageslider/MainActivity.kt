@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.autoimageslider.databinding.ActivityMainBinding
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.IndicatorView.draw.controller.DrawController
+import com.selimdawa.autoimageslider.View.animation.type.IndicatorAnimationType
+import com.selimdawa.autoimageslider.View.draw.controller.DrawController
 import com.selimdawa.autoimageslider.SliderAnimations
 import com.selimdawa.autoimageslider.SliderView
 
@@ -47,14 +47,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun renewItems() {
         val sliderItemList = MutableList(5) { i ->
-            SliderItem().apply {
-                description = "Slider Item $i"
-                imageUrl = if (i % 2 == 0) {
-                    "https://images.pexels.com/photos/929778/pexels-photo-929778.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
-                } else {
-                    "https://images.pexels.com/photos/747964/pexels-photo-747964.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260"
-                }
+            val url = if (i % 2 == 0) {
+                "https://images.pexels.com/photos/929778/pexels-photo-929778.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+            } else {
+                "https://images.pexels.com/photos/747964/pexels-photo-747964.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260"
             }
+            SliderItem("Slider Item $i", url)
         }
         adapter.renewItems(sliderItemList)
     }
@@ -67,11 +65,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addNewItem() {
-        val sliderItem = SliderItem().apply {
-            description = "Slider Item Added Manually"
-            imageUrl =
+        adapter.addItem(
+            SliderItem(
+                "Slider Item Added Manually",
                 "https://images.pexels.com/photos/929778/pexels-photo-929778.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
-        }
-        adapter.addItem(sliderItem)
+            )
+        )
     }
 }

@@ -1,6 +1,6 @@
 package com.flatcode.autoimageslider
 
 data class SliderItem(
-    var description: String? = null,
-    var imageUrl: String? = null
+    val description: String? = null,
+    val imageUrl: String? = null
 )

@@ -47,7 +47,7 @@ enum class SliderAnimations(
         cameraDist = 12000f, rotationFactor = 180f
     ),
     VERTICALSHUTTRANSFORMATION(
-        cameraDist = 999999999f, rotationFactor = 180f, useXAxis = true
+        cameraDist = 1.0E9f, rotationFactor = 180f, useXAxis = true
     ),
     ZOOMOUTTRANSFORMATION
 }

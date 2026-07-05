@@ -15,16 +15,18 @@ import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
 import androidx.viewpager.widget.PagerAdapter
-import com.selimdawa.autoimageslider.IndicatorView.PageIndicatorView
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.BaseAnimation
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.IndicatorView.draw.controller.DrawController.ClickListener
-import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
-import com.selimdawa.autoimageslider.IndicatorView.draw.data.RtlMode
-import com.selimdawa.autoimageslider.IndicatorView.utils.DensityUtils
-import com.selimdawa.autoimageslider.InfiniteAdapter.InfinitePagerAdapter
-import com.selimdawa.autoimageslider.SliderViewAdapter.DataSetListener
+import com.selimdawa.autoimageslider.View.PageIndicatorView
+import com.selimdawa.autoimageslider.View.animation.type.BaseAnimation
+import com.selimdawa.autoimageslider.View.animation.type.IndicatorAnimationType
+import com.selimdawa.autoimageslider.View.draw.controller.DrawController.ClickListener
+import com.selimdawa.autoimageslider.View.draw.data.Orientation
+import com.selimdawa.autoimageslider.View.draw.data.RtlMode
+import com.selimdawa.autoimageslider.View.utils.DensityUtils
+import com.selimdawa.autoimageslider.Adapter.InfinitePagerAdapter
+import com.selimdawa.autoimageslider.Adapter.SliderViewAdapter
+import com.selimdawa.autoimageslider.Adapter.SliderViewAdapter.DataSetListener
 
+@Suppress("unused")
 class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
     SliderPager.OnPageChangeListener {
 
@@ -177,7 +179,7 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupSlideView(context: Context) {
-        val pager = SliderPager(context)
+        val pager = SliderPager(context, null)
         mSliderPager = pager
         pager.overScrollMode = OVER_SCROLL_IF_CONTENT_SCROLLS
         pager.id = generateViewId()
@@ -222,7 +224,7 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
     }
 
     val sliderPager: SliderPager
-        get() = mSliderPager ?: SliderPager(context)
+        get() = mSliderPager ?: SliderPager(context, null)
 
     val sliderAdapter: PagerAdapter?
         get() = mPagerAdapter
