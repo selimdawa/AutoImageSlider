@@ -2,8 +2,8 @@ package com.selimdawa.autoimageslider.IndicatorView.draw.drawer.type
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.DropAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.type.DropAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
 

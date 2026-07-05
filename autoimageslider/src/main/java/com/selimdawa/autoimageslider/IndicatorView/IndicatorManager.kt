@@ -16,7 +16,7 @@ class IndicatorManager internal constructor(private val listener: Listener?) :
         fun onIndicatorUpdated()
     }
 
-    fun animate(): AnimationManager? {
+    fun animate(): AnimationManager {
         return animationManager
     }
 

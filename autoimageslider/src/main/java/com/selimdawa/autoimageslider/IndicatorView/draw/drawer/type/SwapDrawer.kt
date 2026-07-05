@@ -2,8 +2,8 @@ package com.selimdawa.autoimageslider.IndicatorView.draw.drawer.type
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.SwapAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.type.SwapAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
 
@@ -53,9 +53,19 @@ class SwapDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, indicat
 
         currentPaint.color = color
         if (currentIndicator.orientation == Orientation.HORIZONTAL) {
-            canvas.drawCircle(coordinate.toFloat(), coordinateY.toFloat(), radius.toFloat(), currentPaint)
+            canvas.drawCircle(
+                coordinate.toFloat(),
+                coordinateY.toFloat(),
+                radius.toFloat(),
+                currentPaint
+            )
         } else {
-            canvas.drawCircle(coordinateX.toFloat(), coordinate.toFloat(), radius.toFloat(), currentPaint)
+            canvas.drawCircle(
+                coordinateX.toFloat(),
+                coordinate.toFloat(),
+                radius.toFloat(),
+                currentPaint
+            )
         }
     }
 }

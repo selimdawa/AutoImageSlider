@@ -7,10 +7,7 @@ import android.view.View
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.BaseAnimation
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.ColorAnimation
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.FillAnimation
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.ScaleAnimation
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.RtlMode
@@ -36,8 +33,7 @@ class AttributeController(private val indicator: Indicator) {
         val dynamicCount =
             typedArray.getBoolean(R.styleable.PageIndicatorView_piv_dynamicCount, false)
         var count = typedArray.getInt(
-            R.styleable.PageIndicatorView_piv_count,
-            Indicator.COUNT_NONE
+            R.styleable.PageIndicatorView_piv_count, Indicator.COUNT_NONE
         )
 
         if (count == Indicator.COUNT_NONE) {
@@ -63,12 +59,10 @@ class AttributeController(private val indicator: Indicator) {
 
     private fun initColorAttribute(typedArray: TypedArray) {
         val unselectedColor = typedArray.getColor(
-            R.styleable.PageIndicatorView_piv_unselectedColor,
-            ColorAnimation.DEFAULT_UNSELECTED_COLOR.toColorInt()
+            R.styleable.PageIndicatorView_piv_unselectedColor, "#33ffffff".toColorInt()
         )
         val selectedColor = typedArray.getColor(
-            R.styleable.PageIndicatorView_piv_selectedColor,
-            ColorAnimation.DEFAULT_SELECTED_COLOR.toColorInt()
+            R.styleable.PageIndicatorView_piv_selectedColor, "#ffffff".toColorInt()
         )
 
         indicator.unselectedColor = unselectedColor
@@ -87,8 +81,7 @@ class AttributeController(private val indicator: Indicator) {
         }
 
         val animIndex = typedArray.getInt(
-            R.styleable.PageIndicatorView_piv_animationType,
-            IndicatorAnimationType.NONE.ordinal
+            R.styleable.PageIndicatorView_piv_animationType, IndicatorAnimationType.NONE.ordinal
         )
         val animationType = getAnimationType(animIndex)
 
@@ -104,52 +97,30 @@ class AttributeController(private val indicator: Indicator) {
 
     private fun initSizeAttribute(typedArray: TypedArray) {
         val orientationIndex = typedArray.getInt(
-            R.styleable.PageIndicatorView_piv_orientation,
-            Orientation.HORIZONTAL.ordinal
+            R.styleable.PageIndicatorView_piv_orientation, Orientation.HORIZONTAL.ordinal
         )
-        val orientation: Orientation = if (orientationIndex == 0) {
-            Orientation.HORIZONTAL
-        } else {
-            Orientation.VERTICAL
-        }
+        val orientation =
+            if (orientationIndex == 0) Orientation.HORIZONTAL else Orientation.VERTICAL
 
         var radius = typedArray.getDimension(
-            R.styleable.PageIndicatorView_piv_radius,
-            DensityUtils.dpToPx(Indicator.DEFAULT_RADIUS_DP).toFloat()
+            R.styleable.PageIndicatorView_piv_radius, DensityUtils.dpToPx(6).toFloat()
         ).toInt()
-        if (radius < 0) {
-            radius = 0
-        }
+        if (radius < 0) radius = 0
 
         var padding = typedArray.getDimension(
-            R.styleable.PageIndicatorView_piv_padding,
-            DensityUtils.dpToPx(Indicator.DEFAULT_PADDING_DP).toFloat()
+            R.styleable.PageIndicatorView_piv_padding, DensityUtils.dpToPx(8).toFloat()
         ).toInt()
-        if (padding < 0) {
-            padding = 0
-        }
+        if (padding < 0) padding = 0
 
-        var scaleFactor = typedArray.getFloat(
-            R.styleable.PageIndicatorView_piv_scaleFactor,
-            ScaleAnimation.DEFAULT_SCALE_FACTOR
-        )
-        if (scaleFactor < ScaleAnimation.MIN_SCALE_FACTOR) {
-            scaleFactor = ScaleAnimation.MIN_SCALE_FACTOR
-        } else if (scaleFactor > ScaleAnimation.MAX_SCALE_FACTOR) {
-            scaleFactor = ScaleAnimation.MAX_SCALE_FACTOR
-        }
+        var scaleFactor = typedArray.getFloat(R.styleable.PageIndicatorView_piv_scaleFactor, 0.7f)
+        if (scaleFactor < 0.3f) scaleFactor = 0.3f
+        else if (scaleFactor > 1.0f) scaleFactor = 1.0f
 
         var stroke = typedArray.getDimension(
-            R.styleable.PageIndicatorView_piv_strokeWidth,
-            DensityUtils.dpToPx(FillAnimation.DEFAULT_STROKE_DP).toFloat()
+            R.styleable.PageIndicatorView_piv_strokeWidth, DensityUtils.dpToPx(1).toFloat()
         ).toInt()
-        if (stroke > radius) {
-            stroke = radius
-        }
-
-        if (indicator.animationType != IndicatorAnimationType.FILL) {
-            stroke = 0
-        }
+        if (stroke > radius) stroke = radius
+        if (indicator.animationType != IndicatorAnimationType.FILL) stroke = 0
 
         indicator.radius = radius
         indicator.orientation = orientation

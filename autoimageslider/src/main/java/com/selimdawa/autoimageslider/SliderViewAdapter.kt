@@ -8,17 +8,14 @@ import java.util.Queue
 
 abstract class SliderViewAdapter<VH : SliderViewAdapter.ViewHolder> : PagerAdapter() {
     private var dataSetListener: DataSetListener? = null
+    private val destroyedItems: Queue<VH> = LinkedList()
 
     abstract class ViewHolder(val itemView: View)
 
-    private val destroyedItems: Queue<VH> = LinkedList<VH>()
-
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val viewHolder = destroyedItems.poll() ?: onCreateViewHolder(container)
-
         container.addView(viewHolder.itemView)
         onBindViewHolder(viewHolder, position)
-
         return viewHolder
     }
 
@@ -30,13 +27,10 @@ abstract class SliderViewAdapter<VH : SliderViewAdapter.ViewHolder> : PagerAdapt
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun isViewFromObject(view: View, `object`: Any): Boolean {
-        return (`object` as VH).itemView === view
-    }
+    override fun isViewFromObject(view: View, `object`: Any): Boolean =
+        (`object` as VH).itemView == view
 
-    override fun getItemPosition(`object`: Any): Int {
-        return POSITION_NONE
-    }
+    override fun getItemPosition(`object`: Any): Int = POSITION_NONE
 
     override fun notifyDataSetChanged() {
         super.notifyDataSetChanged()

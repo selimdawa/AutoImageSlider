@@ -2,17 +2,14 @@ package com.selimdawa.autoimageslider.IndicatorView.draw.drawer.type
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.ScaleAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.type.ScaleAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 
-class ScaleDownDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, indicator) {
+class ScaleDownDrawer(paint: Paint?, indicator: Indicator?) : BaseDrawer(paint!!, indicator!!) {
+
     fun draw(
-        canvas: Canvas,
-        value: Value,
-        position: Int,
-        coordinateX: Int,
-        coordinateY: Int
+        canvas: Canvas, value: Value, position: Int, coordinateX: Int, coordinateY: Int
     ) {
         if (value !is ScaleAnimationValue) {
             return

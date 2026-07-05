@@ -17,7 +17,6 @@ import androidx.core.view.size
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.ScaleAnimation
 import com.selimdawa.autoimageslider.IndicatorView.draw.controller.DrawController.ClickListener
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
@@ -25,7 +24,6 @@ import com.selimdawa.autoimageslider.IndicatorView.draw.data.PositionSavedState
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.RtlMode
 import com.selimdawa.autoimageslider.IndicatorView.utils.CoordinatesUtils
 import com.selimdawa.autoimageslider.IndicatorView.utils.DensityUtils
-import com.selimdawa.autoimageslider.IndicatorView.utils.IdUtils
 import com.selimdawa.autoimageslider.InfiniteAdapter.InfinitePagerAdapter
 import com.selimdawa.autoimageslider.SliderPager
 
@@ -215,10 +213,10 @@ class PageIndicatorView : View, SliderPager.OnPageChangeListener, IndicatorManag
         get() = manager?.indicator()?.scaleFactor ?: 0f
         set(factor) {
             var finalFactor = factor
-            if (finalFactor > ScaleAnimation.MAX_SCALE_FACTOR) {
-                finalFactor = ScaleAnimation.MAX_SCALE_FACTOR
-            } else if (finalFactor < ScaleAnimation.MIN_SCALE_FACTOR) {
-                finalFactor = ScaleAnimation.MIN_SCALE_FACTOR
+            if (finalFactor > 1.0f) {
+                finalFactor = 1.0f
+            } else if (finalFactor < 0.3f) {
+                finalFactor = 0.3f
             }
 
             manager?.indicator()?.scaleFactor = finalFactor
@@ -431,9 +429,7 @@ class PageIndicatorView : View, SliderPager.OnPageChangeListener, IndicatorManag
     }
 
     private fun setupId() {
-        if (id == NO_ID) {
-            id = IdUtils.generateViewId()
-        }
+        if (id == NO_ID) id = generateViewId()
     }
 
     private fun initIndicatorManager(attrs: AttributeSet?) {

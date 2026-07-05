@@ -12,6 +12,7 @@ import com.selimdawa.autoimageslider.IndicatorView.animation.type.ThinWormAnimat
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.WormAnimation
 
 class ValueController(private val updateListener: UpdateListener?) {
+
     private var colorAnimation: ColorAnimation? = null
     private var scaleAnimation: ScaleAnimation? = null
     private var wormAnimation: WormAnimation? = null
@@ -27,74 +28,50 @@ class ValueController(private val updateListener: UpdateListener?) {
     }
 
     fun color(): ColorAnimation {
-        if (colorAnimation == null) {
-            colorAnimation = ColorAnimation(updateListener)
-        }
-
-        return colorAnimation!!
+        return colorAnimation ?: ColorAnimation(updateListener).also { colorAnimation = it }
     }
 
     fun scale(): ScaleAnimation {
-        if (scaleAnimation == null) {
-            scaleAnimation = ScaleAnimation(updateListener!!)
-        }
-
-        return scaleAnimation!!
+        val listener = requireListener()
+        return scaleAnimation ?: ScaleAnimation(listener).also { scaleAnimation = it }
     }
 
     fun worm(): WormAnimation {
-        if (wormAnimation == null) {
-            wormAnimation = WormAnimation(updateListener!!)
-        }
-
-        return wormAnimation!!
+        val listener = requireListener()
+        return wormAnimation ?: WormAnimation(listener).also { wormAnimation = it }
     }
 
     fun slide(): SlideAnimation {
-        if (slideAnimation == null) {
-            slideAnimation = SlideAnimation(updateListener!!)
-        }
-
-        return slideAnimation!!
+        val listener = requireListener()
+        return slideAnimation ?: SlideAnimation(listener).also { slideAnimation = it }
     }
 
     fun fill(): FillAnimation {
-        if (fillAnimation == null) {
-            fillAnimation = FillAnimation(updateListener!!)
-        }
-
-        return fillAnimation!!
+        val listener = requireListener()
+        return fillAnimation ?: FillAnimation(listener).also { fillAnimation = it }
     }
 
     fun thinWorm(): ThinWormAnimation {
-        if (thinWormAnimation == null) {
-            thinWormAnimation = ThinWormAnimation(updateListener!!)
-        }
-
-        return thinWormAnimation!!
+        val listener = requireListener()
+        return thinWormAnimation ?: ThinWormAnimation(listener).also { thinWormAnimation = it }
     }
 
     fun drop(): DropAnimation {
-        if (dropAnimation == null) {
-            dropAnimation = DropAnimation(updateListener!!)
-        }
-
-        return dropAnimation!!
+        val listener = requireListener()
+        return dropAnimation ?: DropAnimation(listener).also { dropAnimation = it }
     }
 
     fun swap(): SwapAnimation {
-        if (swapAnimation == null) {
-            swapAnimation = SwapAnimation(updateListener!!)
-        }
-
-        return swapAnimation!!
+        val listener = requireListener()
+        return swapAnimation ?: SwapAnimation(listener).also { swapAnimation = it }
     }
 
     fun scaleDown(): ScaleDownAnimation {
-        if (scaleDownAnimation == null) {
-            scaleDownAnimation = ScaleDownAnimation(updateListener!!)
-        }
+        val listener = requireListener()
+        return scaleDownAnimation ?: ScaleDownAnimation(listener).also { scaleDownAnimation = it }
+    }
 
-        return scaleDownAnimation!!
+    private fun requireListener(): UpdateListener {
+        return updateListener ?: throw IllegalStateException("UpdateListener cannot be null")
     }
 }

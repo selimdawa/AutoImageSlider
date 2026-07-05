@@ -221,11 +221,11 @@ open class SliderPager : ViewGroup {
                     val child = getChildAt(i)
                     if (child != null) {
                         val childInsets = ViewCompat.dispatchApplyWindowInsets(child, applied)
-                        res.left = kotlin.math.min(childInsets.systemWindowInsetLeft, res.left)
-                        res.top = kotlin.math.min(childInsets.systemWindowInsetTop, res.top)
-                        res.right = kotlin.math.min(childInsets.systemWindowInsetRight, res.right)
+                        res.left = min(childInsets.systemWindowInsetLeft, res.left)
+                        res.top = min(childInsets.systemWindowInsetTop, res.top)
+                        res.right = min(childInsets.systemWindowInsetRight, res.right)
                         res.bottom =
-                            kotlin.math.min(childInsets.systemWindowInsetBottom, res.bottom)
+                            min(childInsets.systemWindowInsetBottom, res.bottom)
                     }
                     i++
                 }

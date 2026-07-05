@@ -9,34 +9,27 @@ import com.selimdawa.autoimageslider.IndicatorView.utils.CoordinatesUtils
 class AnimationController(
     private val indicator: Indicator, private val listener: ValueController.UpdateListener
 ) {
-    private val valueController: ValueController = ValueController(listener)
-
+    private val valueController = ValueController(listener)
     private var runningAnimation: BaseAnimation<*>? = null
-
     private var progress = 0f
     private var isInteractive = false
 
     fun interactive(progress: Float) {
-        this.isInteractive = true
+        isInteractive = true
         this.progress = progress
         animate()
     }
 
     fun basic() {
-        this.isInteractive = false
-        this.progress = 0f
+        isInteractive = false
+        progress = 0f
         animate()
     }
 
-    fun end() {
-        if (runningAnimation != null) {
-            runningAnimation!!.end()
-        }
-    }
+    fun end() = runningAnimation?.end()
 
     private fun animate() {
-        val animationType = indicator.animationType
-        when (animationType) {
+        when (indicator.animationType) {
             IndicatorAnimationType.NONE, null -> listener.onValueUpdated(null)
             IndicatorAnimationType.COLOR -> colorAnimation()
             IndicatorAnimationType.SCALE -> scaleAnimation()
@@ -51,138 +44,84 @@ class AnimationController(
     }
 
     private fun colorAnimation() {
-        val selectedColor = indicator.selectedColor
-        val unselectedColor = indicator.unselectedColor
-        val animationDuration = indicator.animationDuration
-
         runningAnimation =
-            valueController.color().with(unselectedColor, selectedColor).duration(animationDuration)
-                .configureAndExecute()
+            valueController.color().with(indicator.unselectedColor, indicator.selectedColor)
+                .duration(indicator.animationDuration).configureAndExecute()
     }
 
     private fun scaleAnimation() {
-        val selectedColor = indicator.selectedColor
-        val unselectedColor = indicator.unselectedColor
-        val radiusPx = indicator.radius
-        val scaleFactor = indicator.scaleFactor
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation =
-            valueController.scale().with(unselectedColor, selectedColor, radiusPx, scaleFactor)
-                .duration(animationDuration).configureAndExecute()
+        runningAnimation = valueController.scale().with(
+            indicator.unselectedColor,
+            indicator.selectedColor,
+            indicator.radius,
+            indicator.scaleFactor
+        ).duration(indicator.animationDuration).configureAndExecute()
     }
 
     private fun wormAnimation() {
-        val fromPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectedPosition else indicator.lastSelectedPosition
-        val toPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectingPosition else indicator.selectedPosition
-
-        val from = CoordinatesUtils.getCoordinate(indicator, fromPosition)
-        val to = CoordinatesUtils.getCoordinate(indicator, toPosition)
-        val isRightSide = toPosition > fromPosition
-
-        val radiusPx = indicator.radius
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation = valueController.worm().with(from, to, radiusPx, isRightSide)
-            ?.duration(animationDuration).configureAndExecute()
+        val (from, to) = getTargetCoordinates()
+        runningAnimation = valueController.worm().with(from, to, indicator.radius, to > from)
+            ?.duration(indicator.animationDuration)?.configureAndExecute()
     }
 
     private fun slideAnimation() {
-        val fromPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectedPosition else indicator.lastSelectedPosition
-        val toPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectingPosition else indicator.selectedPosition
-
-        val from = CoordinatesUtils.getCoordinate(indicator, fromPosition)
-        val to = CoordinatesUtils.getCoordinate(indicator, toPosition)
-        val animationDuration = indicator.animationDuration
-
+        val (from, to) = getTargetCoordinates()
         runningAnimation =
-            valueController.slide().with(from, to).duration(animationDuration).configureAndExecute()
+            valueController.slide().with(from, to).duration(indicator.animationDuration)
+                .configureAndExecute()
     }
 
     private fun fillAnimation() {
-        val selectedColor = indicator.selectedColor
-        val unselectedColor = indicator.unselectedColor
-        val radiusPx = indicator.radius
-        val strokePx = indicator.stroke
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation =
-            valueController.fill().with(unselectedColor, selectedColor, radiusPx, strokePx)
-                .duration(animationDuration).configureAndExecute()
+        runningAnimation = valueController.fill().with(
+            indicator.unselectedColor, indicator.selectedColor, indicator.radius, indicator.stroke
+        ).duration(indicator.animationDuration).configureAndExecute()
     }
 
     private fun thinWormAnimation() {
-        val fromPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectedPosition else indicator.lastSelectedPosition
-        val toPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectingPosition else indicator.selectedPosition
-
-        val from = CoordinatesUtils.getCoordinate(indicator, fromPosition)
-        val to = CoordinatesUtils.getCoordinate(indicator, toPosition)
-        val isRightSide = toPosition > fromPosition
-
-        val radiusPx = indicator.radius
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation = valueController.thinWorm().with(from, to, radiusPx, isRightSide)
-            .duration(animationDuration).configureAndExecute()
+        val (from, to) = getTargetCoordinates()
+        runningAnimation = valueController.thinWorm().with(from, to, indicator.radius, to > from)
+            .duration(indicator.animationDuration).configureAndExecute()
     }
 
     private fun dropAnimation() {
-        val fromPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectedPosition else indicator.lastSelectedPosition
-        val toPosition =
-            if (indicator.isInteractiveAnimation) indicator.selectingPosition else indicator.selectedPosition
-
-        val widthFrom = CoordinatesUtils.getCoordinate(indicator, fromPosition)
-        val widthTo = CoordinatesUtils.getCoordinate(indicator, toPosition)
-
-        val paddingTop = indicator.paddingTop
-        val paddingLeft = indicator.paddingLeft
+        val (widthFrom, widthTo) = getTargetCoordinates()
         val padding =
-            if (indicator.orientation == Orientation.HORIZONTAL) paddingTop else paddingLeft
-
+            if (indicator.orientation == Orientation.HORIZONTAL) indicator.paddingTop else indicator.paddingLeft
         val radius = indicator.radius
         val heightFrom = radius * 3 + padding
         val heightTo = radius + padding
 
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation = valueController.drop().duration(animationDuration)
-            .with(widthFrom, widthTo, heightFrom, heightTo, radius).configureAndExecute()
+        runningAnimation =
+            valueController.drop().with(widthFrom, widthTo, heightFrom, heightTo, radius)
+                .duration(indicator.animationDuration).configureAndExecute()
     }
 
     private fun swapAnimation() {
+        val (from, to) = getTargetCoordinates()
+        runningAnimation =
+            valueController.swap().with(from, to).duration(indicator.animationDuration)
+                .configureAndExecute()
+    }
+
+    private fun scaleDownAnimation() {
+        runningAnimation = valueController.scaleDown().with(
+            indicator.unselectedColor,
+            indicator.selectedColor,
+            indicator.radius,
+            indicator.scaleFactor
+        ).duration(indicator.animationDuration).configureAndExecute()
+    }
+
+    private fun getTargetCoordinates(): Pair<Int, Int> {
         val fromPosition =
             if (indicator.isInteractiveAnimation) indicator.selectedPosition else indicator.lastSelectedPosition
         val toPosition =
             if (indicator.isInteractiveAnimation) indicator.selectingPosition else indicator.selectedPosition
-
-        val from = CoordinatesUtils.getCoordinate(indicator, fromPosition)
-        val to = CoordinatesUtils.getCoordinate(indicator, toPosition)
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation =
-            valueController.swap().with(from, to).duration(animationDuration).configureAndExecute()
+        return CoordinatesUtils.getCoordinate(
+            indicator, fromPosition
+        ) to CoordinatesUtils.getCoordinate(indicator, toPosition)
     }
 
-    private fun scaleDownAnimation() {
-        val selectedColor = indicator.selectedColor
-        val unselectedColor = indicator.unselectedColor
-        val radiusPx = indicator.radius
-        val scaleFactor = indicator.scaleFactor
-        val animationDuration = indicator.animationDuration
-
-        runningAnimation =
-            valueController.scaleDown().with(unselectedColor, selectedColor, radiusPx, scaleFactor)
-                .duration(animationDuration).configureAndExecute()
-    }
-
-    // Updated extension to accept a nullable receiver, ensuring smooth and safe chaining
     private fun <T : BaseAnimation<*>> T?.configureAndExecute(): T? {
         val animation = this ?: return null
         if (isInteractive) {

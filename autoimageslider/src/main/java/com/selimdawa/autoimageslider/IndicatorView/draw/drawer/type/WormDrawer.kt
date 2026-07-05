@@ -3,10 +3,10 @@ package com.selimdawa.autoimageslider.IndicatorView.draw.drawer.type
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.type.WormAnimationValue
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.WormAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
 
 open class WormDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, indicator) {
     var rect: RectF = RectF()

@@ -14,11 +14,9 @@ import android.view.animation.Interpolator
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
-import androidx.core.view.ViewCompat
 import androidx.viewpager.widget.PagerAdapter
 import com.selimdawa.autoimageslider.IndicatorView.PageIndicatorView
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.BaseAnimation
-import com.selimdawa.autoimageslider.IndicatorView.animation.type.ColorAnimation
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
 import com.selimdawa.autoimageslider.IndicatorView.draw.controller.AttributeController
 import com.selimdawa.autoimageslider.IndicatorView.draw.controller.DrawController.ClickListener
@@ -27,28 +25,6 @@ import com.selimdawa.autoimageslider.IndicatorView.draw.data.RtlMode
 import com.selimdawa.autoimageslider.IndicatorView.utils.DensityUtils
 import com.selimdawa.autoimageslider.InfiniteAdapter.InfinitePagerAdapter
 import com.selimdawa.autoimageslider.SliderViewAdapter.DataSetListener
-import com.selimdawa.autoimageslider.Transformations.AntiClockSpinTransformation
-import com.selimdawa.autoimageslider.Transformations.Clock_SpinTransformation
-import com.selimdawa.autoimageslider.Transformations.CubeInDepthTransformation
-import com.selimdawa.autoimageslider.Transformations.CubeInRotationTransformation
-import com.selimdawa.autoimageslider.Transformations.CubeInScalingTransformation
-import com.selimdawa.autoimageslider.Transformations.CubeOutDepthTransformation
-import com.selimdawa.autoimageslider.Transformations.CubeOutRotationTransformation
-import com.selimdawa.autoimageslider.Transformations.CubeOutScalingTransformation
-import com.selimdawa.autoimageslider.Transformations.DepthTransformation
-import com.selimdawa.autoimageslider.Transformations.FadeTransformation
-import com.selimdawa.autoimageslider.Transformations.FanTransformation
-import com.selimdawa.autoimageslider.Transformations.FidgetSpinTransformation
-import com.selimdawa.autoimageslider.Transformations.GateTransformation
-import com.selimdawa.autoimageslider.Transformations.HingeTransformation
-import com.selimdawa.autoimageslider.Transformations.HorizontalFlipTransformation
-import com.selimdawa.autoimageslider.Transformations.PopTransformation
-import com.selimdawa.autoimageslider.Transformations.SimpleTransformation
-import com.selimdawa.autoimageslider.Transformations.SpinnerTransformation
-import com.selimdawa.autoimageslider.Transformations.TossTransformation
-import com.selimdawa.autoimageslider.Transformations.VerticalFlipTransformation
-import com.selimdawa.autoimageslider.Transformations.VerticalShutTransformation
-import com.selimdawa.autoimageslider.Transformations.ZoomOutTransformation
 
 class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
     SliderPager.OnPageChangeListener {
@@ -147,12 +123,10 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
                     R.styleable.SliderView_sliderIndicatorGravity, Gravity.CENTER or Gravity.BOTTOM
                 )
                 val indicatorUnselectedColor = getColor(
-                    R.styleable.SliderView_sliderIndicatorUnselectedColor,
-                    ColorAnimation.DEFAULT_UNSELECTED_COLOR.toColorInt()
+                    R.styleable.SliderView_sliderIndicatorUnselectedColor, "#33ffffff".toColorInt()
                 )
                 val indicatorSelectedColor = getColor(
-                    R.styleable.SliderView_sliderIndicatorSelectedColor,
-                    ColorAnimation.DEFAULT_SELECTED_COLOR.toColorInt()
+                    R.styleable.SliderView_sliderIndicatorSelectedColor, "#ffffff".toColorInt()
                 )
                 val indicatorAnimationDuration = getInt(
                     R.styleable.SliderView_sliderIndicatorAnimationDuration,
@@ -207,10 +181,8 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
         val pager = SliderPager(context)
         mSliderPager = pager
         pager.overScrollMode = OVER_SCROLL_IF_CONTENT_SCROLLS
-        pager.id = ViewCompat.generateViewId()
-        val sliderParams = LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT
-        )
+        pager.id = generateViewId()
+        val sliderParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         addView(pager, 0, sliderParams)
         pager.setOnTouchListener(this)
         pager.addOnPageChangeListener(this)
@@ -267,94 +239,7 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
         }
 
     fun setSliderTransformAnimation(animation: SliderAnimations) {
-        val pager = mSliderPager ?: return
-        when (animation) {
-            SliderAnimations.ANTICLOCKSPINTRANSFORMATION -> pager.setPageTransformer(
-                false, AntiClockSpinTransformation()
-            )
-
-            SliderAnimations.CLOCK_SPINTRANSFORMATION -> pager.setPageTransformer(
-                false, Clock_SpinTransformation()
-            )
-
-            SliderAnimations.CUBEINDEPTHTRANSFORMATION -> pager.setPageTransformer(
-                false, CubeInDepthTransformation()
-            )
-
-            SliderAnimations.CUBEINROTATIONTRANSFORMATION -> pager.setPageTransformer(
-                false, CubeInRotationTransformation()
-            )
-
-            SliderAnimations.CUBEINSCALINGTRANSFORMATION -> pager.setPageTransformer(
-                false, CubeInScalingTransformation()
-            )
-
-            SliderAnimations.CUBEOUTDEPTHTRANSFORMATION -> pager.setPageTransformer(
-                false, CubeOutDepthTransformation()
-            )
-
-            SliderAnimations.CUBEOUTROTATIONTRANSFORMATION -> pager.setPageTransformer(
-                false, CubeOutRotationTransformation()
-            )
-
-            SliderAnimations.CUBEOUTSCALINGTRANSFORMATION -> pager.setPageTransformer(
-                false, CubeOutScalingTransformation()
-            )
-
-            SliderAnimations.DEPTHTRANSFORMATION -> pager.setPageTransformer(
-                false, DepthTransformation()
-            )
-
-            SliderAnimations.FADETRANSFORMATION -> pager.setPageTransformer(
-                false, FadeTransformation()
-            )
-
-            SliderAnimations.FANTRANSFORMATION -> pager.setPageTransformer(
-                false, FanTransformation()
-            )
-
-            SliderAnimations.FIDGETSPINTRANSFORMATION -> pager.setPageTransformer(
-                false, FidgetSpinTransformation()
-            )
-
-            SliderAnimations.GATETRANSFORMATION -> pager.setPageTransformer(
-                false, GateTransformation()
-            )
-
-            SliderAnimations.HINGETRANSFORMATION -> pager.setPageTransformer(
-                false, HingeTransformation()
-            )
-
-            SliderAnimations.HORIZONTALFLIPTRANSFORMATION -> pager.setPageTransformer(
-                false, HorizontalFlipTransformation()
-            )
-
-            SliderAnimations.POPTRANSFORMATION -> pager.setPageTransformer(
-                false, PopTransformation()
-            )
-
-            SliderAnimations.SPINNERTRANSFORMATION -> pager.setPageTransformer(
-                false, SpinnerTransformation()
-            )
-
-            SliderAnimations.TOSSTRANSFORMATION -> pager.setPageTransformer(
-                false, TossTransformation()
-            )
-
-            SliderAnimations.VERTICALFLIPTRANSFORMATION -> pager.setPageTransformer(
-                false, VerticalFlipTransformation()
-            )
-
-            SliderAnimations.VERTICALSHUTTRANSFORMATION -> pager.setPageTransformer(
-                false, VerticalShutTransformation()
-            )
-
-            SliderAnimations.ZOOMOUTTRANSFORMATION -> pager.setPageTransformer(
-                false, ZoomOutTransformation()
-            )
-
-            else -> pager.setPageTransformer(false, SimpleTransformation())
-        }
+        mSliderPager?.setPageTransformer(false, SmartTransformer(animation))
     }
 
     override fun onTouch(v: View?, event: MotionEvent): Boolean {
@@ -442,7 +327,7 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
         get() {
             return try {
                 this.sliderAdapter?.count ?: 0
-            } catch (e: NullPointerException) {
+            } catch (_: NullPointerException) {
                 Log.e(
                     TAG,
                     "getAdapterItemsCount: Slider Adapter is null so, it can't get count of items"

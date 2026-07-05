@@ -2,10 +2,10 @@ package com.selimdawa.autoimageslider.IndicatorView.draw.drawer.type
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
-import com.selimdawa.autoimageslider.IndicatorView.animation.data.type.ThinWormAnimationValue
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.ThinWormAnimationValue
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Indicator
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
+import com.selimdawa.autoimageslider.IndicatorView.animation.data.Value
 
 class ThinWormDrawer(paint: Paint, indicator: Indicator) : WormDrawer(paint, indicator) {
     override fun draw(
