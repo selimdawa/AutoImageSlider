@@ -18,7 +18,6 @@ import androidx.viewpager.widget.PagerAdapter
 import com.selimdawa.autoimageslider.IndicatorView.PageIndicatorView
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.BaseAnimation
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.IndicatorView.draw.controller.AttributeController
 import com.selimdawa.autoimageslider.IndicatorView.draw.controller.DrawController.ClickListener
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.Orientation
 import com.selimdawa.autoimageslider.IndicatorView.draw.data.RtlMode
@@ -135,7 +134,7 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
                 val indicatorRtlMode = getInt(
                     R.styleable.SliderView_sliderIndicatorRtlMode, RtlMode.Off.ordinal
                 )
-                val rtlMode: RtlMode = AttributeController.getRtlMode(indicatorRtlMode)
+                val rtlMode: RtlMode = RtlMode.entries.getOrNull(indicatorRtlMode) ?: RtlMode.Auto
 
                 setIndicatorOrientation(orientation)
                 this@SliderView.indicatorRadius = indicatorRadius

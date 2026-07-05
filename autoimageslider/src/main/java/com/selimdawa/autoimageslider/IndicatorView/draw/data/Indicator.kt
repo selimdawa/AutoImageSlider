@@ -4,63 +4,49 @@ import android.view.View
 import com.selimdawa.autoimageslider.IndicatorView.animation.type.IndicatorAnimationType
 
 class Indicator {
-    var height: Int = 0
-    var width: Int = 0
-    var radius: Int = 0
+    var height = 0
+    var width = 0
+    var radius = 0
 
-    var padding: Int = 0
-    var paddingLeft: Int = 0
-    var paddingTop: Int = 0
-    var paddingRight: Int = 0
-    var paddingBottom: Int = 0
+    var padding = 0
+    var paddingLeft = 0
+    var paddingTop = 0
+    var paddingRight = 0
+    var paddingBottom = 0
 
-    var stroke: Int = 0 //For "Fill" animation only
-    var scaleFactor: Float = 0f //For "Scale" animation only
+    var stroke = 0
+    var scaleFactor = 0f
 
-    var unselectedColor: Int = 0
-    var selectedColor: Int = 0
+    var unselectedColor = 0
+    var selectedColor = 0
 
-    var isInteractiveAnimation: Boolean = false
-    var isAutoVisibility: Boolean = false
-    var isDynamicCount: Boolean = false
+    var isInteractiveAnimation = false
+    var isAutoVisibility = false
+    var isDynamicCount = false
 
-    var animationDuration: Long = 0
-    var count: Int = DEFAULT_COUNT
+    var animationDuration = 0L
+    var count = DEFAULT_COUNT
 
-    var selectedPosition: Int = 0
-    var selectingPosition: Int = 0
-    var lastSelectedPosition: Int = 0
+    var selectedPosition = 0
+    var selectingPosition = 0
+    var lastSelectedPosition = 0
 
-    var viewPagerId: Int = View.NO_ID
+    var viewPagerId = View.NO_ID
 
     var orientation: Orientation? = null
-        get() {
-            if (field == null) {
-                field = Orientation.HORIZONTAL
-            }
-            return field
-        }
+        get() = field ?: Orientation.HORIZONTAL
+
     var animationType: IndicatorAnimationType? = null
-        get() {
-            if (field == null) {
-                field = IndicatorAnimationType.NONE
-            }
-            return field
-        }
+        get() = field ?: IndicatorAnimationType.NONE
+
     var rtlMode: RtlMode? = null
-        get() {
-            if (field == null) {
-                field = RtlMode.Off
-            }
-            return field
-        }
+        get() = field ?: RtlMode.Off
 
     companion object {
-        const val DEFAULT_COUNT: Int = 3
-        const val MIN_COUNT: Int = 1
-        const val COUNT_NONE: Int = -1
-
-        const val DEFAULT_RADIUS_DP: Int = 6
-        const val DEFAULT_PADDING_DP: Int = 8
+        const val DEFAULT_COUNT = 3
+        const val MIN_COUNT = 1
+        const val COUNT_NONE = -1
+        const val DEFAULT_RADIUS_DP = 6
+        const val DEFAULT_PADDING_DP = 8
     }
 }

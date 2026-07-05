@@ -29,6 +29,7 @@ import com.selimdawa.autoimageslider.SliderPager
 
 class PageIndicatorView : View, SliderPager.OnPageChangeListener, IndicatorManager.Listener,
     SliderPager.OnAdapterChangeListener {
+
     private var manager: IndicatorManager? = null
     private var setObserver: DataSetObserver? = null
     private var viewPager: SliderPager? = null

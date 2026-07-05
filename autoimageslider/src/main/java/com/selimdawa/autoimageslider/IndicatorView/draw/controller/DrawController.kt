@@ -10,7 +10,7 @@ import com.selimdawa.autoimageslider.IndicatorView.utils.CoordinatesUtils
 
 class DrawController(private val indicator: Indicator) {
     private var value: Value? = null
-    private val drawer: Drawer = Drawer(indicator)
+    private val drawer = Drawer(indicator)
     private var listener: ClickListener? = null
 
     interface ClickListener {
@@ -26,60 +26,33 @@ class DrawController(private val indicator: Indicator) {
     }
 
     fun touch(event: MotionEvent?) {
-        if (event == null) {
-            return
-        }
-
-        when (event.action) {
-            MotionEvent.ACTION_UP -> onIndicatorTouched(event.x, event.y)
-            else -> {}
-        }
-    }
-
-    private fun onIndicatorTouched(x: Float, y: Float) {
-        val currentListener = listener
-        if (currentListener != null) {
-            val position = CoordinatesUtils.getPosition(indicator, x, y)
-            if (position >= 0) {
-                currentListener.onIndicatorClicked(position)
-            }
+        if (event?.action == MotionEvent.ACTION_UP) {
+            val position = CoordinatesUtils.getPosition(indicator, event.x, event.y)
+            if (position >= 0) listener?.onIndicatorClicked(position)
         }
     }
 
     fun draw(canvas: Canvas) {
-        val count = indicator.count
-
-        for (position in 0..<count) {
-            val coordinateX = CoordinatesUtils.getXCoordinate(indicator, position)
-            val coordinateY = CoordinatesUtils.getYCoordinate(indicator, position)
-            drawIndicator(canvas, position, coordinateX, coordinateY)
+        for (position in 0..<indicator.count) {
+            drawIndicator(
+                canvas,
+                position,
+                CoordinatesUtils.getXCoordinate(indicator, position),
+                CoordinatesUtils.getYCoordinate(indicator, position)
+            )
         }
     }
 
-    private fun drawIndicator(
-        canvas: Canvas,
-        position: Int,
-        coordinateX: Int,
-        coordinateY: Int
-    ) {
-        val interactiveAnimation = indicator.isInteractiveAnimation
-        val selectedPosition = indicator.selectedPosition
-        val selectingPosition = indicator.selectingPosition
-        val lastSelectedPosition = indicator.lastSelectedPosition
+    private fun drawIndicator(canvas: Canvas, position: Int, coordinateX: Int, coordinateY: Int) {
+        val isInteractive = indicator.isInteractiveAnimation
+        val selected = indicator.selectedPosition
+        val isSelected =
+            (!isInteractive && (position == selected || position == indicator.lastSelectedPosition)) || (isInteractive && (position == selected || position == indicator.selectingPosition))
 
-        val selectedItem =
-            !interactiveAnimation && (position == selectedPosition || position == lastSelectedPosition)
-        val selectingItem =
-            interactiveAnimation && (position == selectedPosition || position == selectingPosition)
-        val isSelectedItem = selectedItem or selectingItem
         drawer.setup(position, coordinateX, coordinateY)
-
-        val currentValue = value
-        if (currentValue != null && isSelectedItem) {
-            drawWithAnimation(canvas, currentValue)
-        } else {
-            drawer.drawBasic(canvas, isSelectedItem)
-        }
+        value?.takeIf { isSelected }?.let { drawWithAnimation(canvas, it) } ?: drawer.drawBasic(
+            canvas, isSelected
+        )
     }
 
     private fun drawWithAnimation(canvas: Canvas, animatedValue: Value) {

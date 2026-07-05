@@ -19,18 +19,14 @@ abstract class SliderViewAdapter<VH : SliderViewAdapter.ViewHolder> : PagerAdapt
         return viewHolder
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-        val viewHolder = `object` as VH
-        container.removeView(viewHolder.itemView)
-        destroyedItems.add(viewHolder)
+        container.removeView((`object` as VH).itemView)
+        destroyedItems.add(`object`)
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun isViewFromObject(view: View, `object`: Any): Boolean =
-        (`object` as VH).itemView == view
+    override fun isViewFromObject(view: View, `object`: Any) = (`object` as VH).itemView == view
 
-    override fun getItemPosition(`object`: Any): Int = POSITION_NONE
+    override fun getItemPosition(`object`: Any) = POSITION_NONE
 
     override fun notifyDataSetChanged() {
         super.notifyDataSetChanged()
@@ -38,11 +34,10 @@ abstract class SliderViewAdapter<VH : SliderViewAdapter.ViewHolder> : PagerAdapt
     }
 
     abstract fun onCreateViewHolder(parent: ViewGroup): VH
-
     abstract fun onBindViewHolder(viewHolder: VH, position: Int)
 
-    internal fun dataSetChangedListener(dataSetListener: DataSetListener?) {
-        this.dataSetListener = dataSetListener
+    internal fun dataSetChangedListener(listener: DataSetListener?) {
+        dataSetListener = listener
     }
 
     internal interface DataSetListener {

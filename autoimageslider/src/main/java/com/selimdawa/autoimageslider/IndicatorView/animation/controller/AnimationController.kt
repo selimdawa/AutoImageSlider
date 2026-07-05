@@ -29,87 +29,60 @@ class AnimationController(
     fun end() = runningAnimation?.end()
 
     private fun animate() {
-        when (indicator.animationType) {
-            IndicatorAnimationType.NONE, null -> listener.onValueUpdated(null)
-            IndicatorAnimationType.COLOR -> colorAnimation()
-            IndicatorAnimationType.SCALE -> scaleAnimation()
-            IndicatorAnimationType.WORM -> wormAnimation()
-            IndicatorAnimationType.FILL -> fillAnimation()
-            IndicatorAnimationType.SLIDE -> slideAnimation()
-            IndicatorAnimationType.THIN_WORM -> thinWormAnimation()
-            IndicatorAnimationType.DROP -> dropAnimation()
-            IndicatorAnimationType.SWAP -> swapAnimation()
-            IndicatorAnimationType.SCALE_DOWN -> scaleDownAnimation()
-        }
-    }
-
-    private fun colorAnimation() {
-        runningAnimation =
-            valueController.color().with(indicator.unselectedColor, indicator.selectedColor)
-                .duration(indicator.animationDuration).configureAndExecute()
-    }
-
-    private fun scaleAnimation() {
-        runningAnimation = valueController.scale().with(
-            indicator.unselectedColor,
-            indicator.selectedColor,
-            indicator.radius,
-            indicator.scaleFactor
-        ).duration(indicator.animationDuration).configureAndExecute()
-    }
-
-    private fun wormAnimation() {
         val (from, to) = getTargetCoordinates()
-        runningAnimation = valueController.worm().with(from, to, indicator.radius, to > from)
-            ?.duration(indicator.animationDuration)?.configureAndExecute()
-    }
+        val duration = indicator.animationDuration
 
-    private fun slideAnimation() {
-        val (from, to) = getTargetCoordinates()
-        runningAnimation =
-            valueController.slide().with(from, to).duration(indicator.animationDuration)
-                .configureAndExecute()
-    }
+        runningAnimation = when (indicator.animationType) {
+            IndicatorAnimationType.NONE, null -> {
+                listener.onValueUpdated(null); null
+            }
 
-    private fun fillAnimation() {
-        runningAnimation = valueController.fill().with(
-            indicator.unselectedColor, indicator.selectedColor, indicator.radius, indicator.stroke
-        ).duration(indicator.animationDuration).configureAndExecute()
-    }
+            IndicatorAnimationType.COLOR -> valueController.color()
+                .with(indicator.unselectedColor, indicator.selectedColor).duration(duration)
 
-    private fun thinWormAnimation() {
-        val (from, to) = getTargetCoordinates()
-        runningAnimation = valueController.thinWorm().with(from, to, indicator.radius, to > from)
-            .duration(indicator.animationDuration).configureAndExecute()
-    }
+            IndicatorAnimationType.SCALE -> valueController.scale().with(
+                indicator.unselectedColor,
+                indicator.selectedColor,
+                indicator.radius,
+                indicator.scaleFactor
+            ).duration(duration)
 
-    private fun dropAnimation() {
-        val (widthFrom, widthTo) = getTargetCoordinates()
-        val padding =
-            if (indicator.orientation == Orientation.HORIZONTAL) indicator.paddingTop else indicator.paddingLeft
-        val radius = indicator.radius
-        val heightFrom = radius * 3 + padding
-        val heightTo = radius + padding
+            IndicatorAnimationType.WORM -> valueController.worm()
+                .with(from, to, indicator.radius, to > from)?.duration(duration)
 
-        runningAnimation =
-            valueController.drop().with(widthFrom, widthTo, heightFrom, heightTo, radius)
-                .duration(indicator.animationDuration).configureAndExecute()
-    }
+            IndicatorAnimationType.SLIDE -> valueController.slide().with(from, to)
+                .duration(duration)
 
-    private fun swapAnimation() {
-        val (from, to) = getTargetCoordinates()
-        runningAnimation =
-            valueController.swap().with(from, to).duration(indicator.animationDuration)
-                .configureAndExecute()
-    }
+            IndicatorAnimationType.FILL -> valueController.fill().with(
+                indicator.unselectedColor,
+                indicator.selectedColor,
+                indicator.radius,
+                indicator.stroke
+            ).duration(duration)
 
-    private fun scaleDownAnimation() {
-        runningAnimation = valueController.scaleDown().with(
-            indicator.unselectedColor,
-            indicator.selectedColor,
-            indicator.radius,
-            indicator.scaleFactor
-        ).duration(indicator.animationDuration).configureAndExecute()
+            IndicatorAnimationType.THIN_WORM -> valueController.thinWorm()
+                .with(from, to, indicator.radius, to > from).duration(duration)
+
+            IndicatorAnimationType.DROP -> {
+                val padding =
+                    if (indicator.orientation == Orientation.HORIZONTAL) indicator.paddingTop else indicator.paddingLeft
+                valueController.drop().with(
+                    from,
+                    to,
+                    indicator.radius * 3 + padding,
+                    indicator.radius + padding,
+                    indicator.radius
+                ).duration(duration)
+            }
+
+            IndicatorAnimationType.SWAP -> valueController.swap().with(from, to).duration(duration)
+            IndicatorAnimationType.SCALE_DOWN -> valueController.scaleDown().with(
+                indicator.unselectedColor,
+                indicator.selectedColor,
+                indicator.radius,
+                indicator.scaleFactor
+            ).duration(duration)
+        }?.configureAndExecute()
     }
 
     private fun getTargetCoordinates(): Pair<Int, Int> {
@@ -122,13 +95,8 @@ class AnimationController(
         ) to CoordinatesUtils.getCoordinate(indicator, toPosition)
     }
 
-    private fun <T : BaseAnimation<*>> T?.configureAndExecute(): T? {
-        val animation = this ?: return null
-        if (isInteractive) {
-            animation.progress(progress)
-        } else {
-            animation.start()
-        }
-        return animation
+    private fun <T : BaseAnimation<*>> T.configureAndExecute(): T {
+        if (isInteractive) this.progress(progress) else this.start()
+        return this
     }
 }

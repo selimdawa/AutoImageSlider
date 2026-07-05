@@ -27,51 +27,26 @@ class ValueController(private val updateListener: UpdateListener?) {
         fun onValueUpdated(value: Value?)
     }
 
-    fun color(): ColorAnimation {
-        return colorAnimation ?: ColorAnimation(updateListener).also { colorAnimation = it }
-    }
+    fun color() = colorAnimation ?: ColorAnimation(updateListener).also { colorAnimation = it }
 
-    fun scale(): ScaleAnimation {
-        val listener = requireListener()
-        return scaleAnimation ?: ScaleAnimation(listener).also { scaleAnimation = it }
-    }
+    fun scale() = scaleAnimation ?: ScaleAnimation(requireListener()).also { scaleAnimation = it }
 
-    fun worm(): WormAnimation {
-        val listener = requireListener()
-        return wormAnimation ?: WormAnimation(listener).also { wormAnimation = it }
-    }
+    fun worm() = wormAnimation ?: WormAnimation(requireListener()).also { wormAnimation = it }
 
-    fun slide(): SlideAnimation {
-        val listener = requireListener()
-        return slideAnimation ?: SlideAnimation(listener).also { slideAnimation = it }
-    }
+    fun slide() = slideAnimation ?: SlideAnimation(requireListener()).also { slideAnimation = it }
 
-    fun fill(): FillAnimation {
-        val listener = requireListener()
-        return fillAnimation ?: FillAnimation(listener).also { fillAnimation = it }
-    }
+    fun fill() = fillAnimation ?: FillAnimation(requireListener()).also { fillAnimation = it }
 
-    fun thinWorm(): ThinWormAnimation {
-        val listener = requireListener()
-        return thinWormAnimation ?: ThinWormAnimation(listener).also { thinWormAnimation = it }
-    }
+    fun thinWorm() =
+        thinWormAnimation ?: ThinWormAnimation(requireListener()).also { thinWormAnimation = it }
 
-    fun drop(): DropAnimation {
-        val listener = requireListener()
-        return dropAnimation ?: DropAnimation(listener).also { dropAnimation = it }
-    }
+    fun drop() = dropAnimation ?: DropAnimation(requireListener()).also { dropAnimation = it }
 
-    fun swap(): SwapAnimation {
-        val listener = requireListener()
-        return swapAnimation ?: SwapAnimation(listener).also { swapAnimation = it }
-    }
+    fun swap() = swapAnimation ?: SwapAnimation(requireListener()).also { swapAnimation = it }
 
-    fun scaleDown(): ScaleDownAnimation {
-        val listener = requireListener()
-        return scaleDownAnimation ?: ScaleDownAnimation(listener).also { scaleDownAnimation = it }
-    }
+    fun scaleDown() =
+        scaleDownAnimation ?: ScaleDownAnimation(requireListener()).also { scaleDownAnimation = it }
 
-    private fun requireListener(): UpdateListener {
-        return updateListener ?: throw IllegalStateException("UpdateListener cannot be null")
-    }
+    private fun requireListener() =
+        updateListener ?: throw IllegalStateException("UpdateListener cannot be null")
 }
