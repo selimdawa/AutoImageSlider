@@ -29,16 +29,6 @@ android {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            register<MavenPublication>("release") {
-                from(components["release"])
-            }
-        }
-    }
-}
-
 mavenPublishing {
 
     coordinates(
