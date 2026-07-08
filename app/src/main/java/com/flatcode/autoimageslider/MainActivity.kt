@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.autoimageslider.databinding.ActivityMainBinding
-import com.selimdawa.autoimageslider.View.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.View.draw.controller.DrawController
-import com.selimdawa.autoimageslider.SliderAnimations
-import com.selimdawa.autoimageslider.SliderView
+import io.selimdawa.autoimageslider.View.animation.type.IndicatorAnimationType
+import io.selimdawa.autoimageslider.View.draw.controller.DrawController
+import io.selimdawa.autoimageslider.SliderAnimations
+import io.selimdawa.autoimageslider.SliderView
 
 class MainActivity : AppCompatActivity() {
 
