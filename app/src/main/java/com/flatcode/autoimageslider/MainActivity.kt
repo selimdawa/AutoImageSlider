@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.flatcode.autoimageslider.databinding.ActivityMainBinding
-import io.selimdawa.autoimageslider.View.animation.type.IndicatorAnimationType
-import io.selimdawa.autoimageslider.View.draw.controller.DrawController
+import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
+import io.selimdawa.autoimageslider.view.draw.controller.DrawController
 import io.selimdawa.autoimageslider.SliderAnimations
 import io.selimdawa.autoimageslider.SliderView
 

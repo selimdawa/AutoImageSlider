@@ -13,7 +13,7 @@
         app:cardCornerRadius="16dp"
         app:strokeWidth="0dp">
 
-        <com.selimdawa.autoimageslider.SliderView
+        <io.selimdawa.autoimageslider.SliderView
             android:id="@+id/imageSlider"
             android:layout_width="match_parent"
             android:layout_height="300dp"

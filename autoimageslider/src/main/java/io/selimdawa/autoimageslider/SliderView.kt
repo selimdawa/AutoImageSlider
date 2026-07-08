@@ -15,16 +15,16 @@ import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
 import androidx.viewpager.widget.PagerAdapter
-import com.selimdawa.autoimageslider.View.PageIndicatorView
-import com.selimdawa.autoimageslider.View.animation.type.BaseAnimation
-import com.selimdawa.autoimageslider.View.animation.type.IndicatorAnimationType
-import com.selimdawa.autoimageslider.View.draw.controller.DrawController.ClickListener
-import com.selimdawa.autoimageslider.View.draw.data.Orientation
-import com.selimdawa.autoimageslider.View.draw.data.RtlMode
-import com.selimdawa.autoimageslider.View.utils.DensityUtils
-import com.selimdawa.autoimageslider.Adapter.InfinitePagerAdapter
-import com.selimdawa.autoimageslider.Adapter.SliderViewAdapter
-import com.selimdawa.autoimageslider.Adapter.SliderViewAdapter.DataSetListener
+import io.selimdawa.autoimageslider.view.PageIndicatorView
+import io.selimdawa.autoimageslider.view.animation.type.BaseAnimation
+import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
+import io.selimdawa.autoimageslider.view.draw.controller.DrawController.ClickListener
+import io.selimdawa.autoimageslider.view.draw.data.Orientation
+import io.selimdawa.autoimageslider.view.draw.data.RtlMode
+import io.selimdawa.autoimageslider.view.utils.DensityUtils
+import io.selimdawa.autoimageslider.adapter.InfinitePagerAdapter
+import io.selimdawa.autoimageslider.adapter.SliderViewAdapter
+import io.selimdawa.autoimageslider.adapter.SliderViewAdapter.DataSetListener
 
 @Suppress("unused")
 class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,

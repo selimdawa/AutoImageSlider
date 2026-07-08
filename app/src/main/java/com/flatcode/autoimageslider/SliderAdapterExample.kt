@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.flatcode.autoimageslider.databinding.ImageSliderLayoutItemBinding
-import com.selimdawa.autoimageslider.Adapter.SliderViewAdapter
+import io.selimdawa.autoimageslider.adapter.SliderViewAdapter
 
 class SliderAdapterExample(private val context: Context) :
     SliderViewAdapter<SliderAdapterExample.SliderAdapterVH>() {

@@ -39,7 +39,7 @@ import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.customview.view.AbsSavedState
 import androidx.viewpager.widget.PagerAdapter
-import com.selimdawa.autoimageslider.Adapter.InfinitePagerAdapter
+import io.selimdawa.autoimageslider.adapter.InfinitePagerAdapter
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
