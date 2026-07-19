@@ -45,5 +45,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     //Image
-    implementation(libs.glide)
+    implementation(libs.coil)
 }

@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
-import com.bumptech.glide.Glide
+import coil.load
 import com.flatcode.autoimageslider.databinding.ImageSliderLayoutItemBinding
 import io.selimdawa.autoimageslider.adapter.SliderViewAdapter
 
@@ -47,8 +47,7 @@ class SliderAdapterExample(private val context: Context) :
             tvAutoImageSlider.textSize = 16f
             tvAutoImageSlider.setTextColor(Color.WHITE)
 
-            Glide.with(ivAutoImageSlider.context).load(sliderItem.imageUrl).fitCenter()
-                .into(ivAutoImageSlider)
+            ivAutoImageSlider.load(sliderItem.imageUrl)
 
             root.setOnClickListener {
                 Toast.makeText(context, "This is item in position $position", Toast.LENGTH_SHORT)

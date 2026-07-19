@@ -1,282 +1,157 @@
 package io.selimdawa.autoimageslider
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
-import android.view.Gravity
-import android.view.MotionEvent
-import android.view.View
-import android.view.View.OnTouchListener
+import android.view.*
 import android.view.animation.Interpolator
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
 import androidx.viewpager.widget.PagerAdapter
+import io.selimdawa.autoimageslider.adapter.InfinitePagerAdapter
+import io.selimdawa.autoimageslider.adapter.SliderViewAdapter
 import io.selimdawa.autoimageslider.view.PageIndicatorView
 import io.selimdawa.autoimageslider.view.animation.type.BaseAnimation
 import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
-import io.selimdawa.autoimageslider.view.draw.controller.DrawController.ClickListener
+import io.selimdawa.autoimageslider.view.draw.controller.DrawController
 import io.selimdawa.autoimageslider.view.draw.data.Orientation
 import io.selimdawa.autoimageslider.view.draw.data.RtlMode
 import io.selimdawa.autoimageslider.view.utils.DensityUtils
-import io.selimdawa.autoimageslider.adapter.InfinitePagerAdapter
-import io.selimdawa.autoimageslider.adapter.SliderViewAdapter
-import io.selimdawa.autoimageslider.adapter.SliderViewAdapter.DataSetListener
 
 @Suppress("unused")
-class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
-    SliderPager.OnPageChangeListener {
+class SliderView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr), Runnable, View.OnTouchListener,
+    SliderViewAdapter.DataSetListener, SliderPager.OnPageChangeListener {
 
     private val mHandler = Handler(Looper.getMainLooper())
     private var mFlagBackAndForth = false
-
-    var isAutoCycle: Boolean = false
-    var autoCycleDirection: Int = 0
-    var scrollTimeInMillis: Int = 0
-    var pagerIndicator: PageIndicatorView? = null
-        private set
-    private var mPagerAdapter: SliderViewAdapter<*>? = null
-    private var mSliderPager: SliderPager? = null
-    private var mInfinitePagerAdapter: InfinitePagerAdapter? = null
-    private var mPageListener: OnSliderPageListener? = null
-    private var mIsInfiniteAdapter = true
-    private var mIsIndicatorEnabled = true
     private var mPreviousPosition = -1
+    private var mSliderPager: SliderPager? = null
 
-    constructor(context: Context) : super(context) {
-        setupSlideView(context)
+    var isAutoCycle = false
+    var autoCycleDirection = AUTO_CYCLE_DIRECTION_RIGHT
+    var scrollTimeInMillis = 2000
+    var pagerIndicator: PageIndicatorView? = null; private set
+    var sliderAdapter: PagerAdapter? = null; private set
+    var isInfiniteAdapter = true
+    private var mPageListener: OnSliderPageListener? = null
+
+    var scrollTimeInSec: Int
+        get() = scrollTimeInMillis / 1000
+        set(value) { scrollTimeInMillis = value * 1000 }
+
+    var currentPagePosition: Int
+        get() = mSliderPager?.currentItem ?: 0
+        set(value) { mSliderPager?.setCurrentItem(value, true) }
+
+    var indicatorRadius: Int
+        get() = pagerIndicator?.radius ?: 0
+        set(value) { pagerIndicator?.radius = value }
+
+    var indicatorSelectedColor: Int
+        get() = pagerIndicator?.selectedColor ?: 0
+        set(value) { pagerIndicator?.selectedColor = value }
+
+    var indicatorUnselectedColor: Int
+        get() = pagerIndicator?.unselectedColor ?: 0
+        set(value) { pagerIndicator?.unselectedColor = value }
+
+    init {
+        setupSlideView()
+        attrs?.let { setUpAttributes(it) }
     }
 
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        setupSlideView(context)
-        setUpAttributes(context, attrs)
+    private fun setupSlideView() {
+        mSliderPager = SliderPager(context).apply {
+            overScrollMode = OVER_SCROLL_IF_CONTENT_SCROLLS
+            id = generateViewId()
+            setOnTouchListener(this@SliderView)
+            addOnPageChangeListener(this@SliderView)
+        }
+        addView(mSliderPager, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context, attrs, defStyleAttr
-    ) {
-        setupSlideView(context)
-        setUpAttributes(context, attrs)
-    }
-
-    private fun setUpAttributes(context: Context, attrs: AttributeSet?) {
-        context.withStyledAttributes(attrs, R.styleable.SliderView, 0, 0) {
-            val indicatorEnabled = getBoolean(R.styleable.SliderView_sliderIndicatorEnabled, true)
-            val sliderAnimationDuration = getInt(
-                R.styleable.SliderView_sliderAnimationDuration, SliderPager.DEFAULT_SCROLL_DURATION
-            )
-            val sliderScrollTimeInSec = getInt(R.styleable.SliderView_sliderScrollTimeInSec, 2)
-            val sliderAutoCycleEnabled =
-                getBoolean(R.styleable.SliderView_sliderAutoCycleEnabled, true)
-            val sliderStartAutoCycle =
-                getBoolean(R.styleable.SliderView_sliderStartAutoCycle, false)
-            val sliderAutoCycleDirection = getInt(
-                R.styleable.SliderView_sliderAutoCycleDirection, AUTO_CYCLE_DIRECTION_RIGHT
-            )
-
-            setSliderAnimationDuration(sliderAnimationDuration)
-            this@SliderView.scrollTimeInSec = sliderScrollTimeInSec
-            this@SliderView.isAutoCycle = sliderAutoCycleEnabled
-            this@SliderView.autoCycleDirection = sliderAutoCycleDirection
-            this@SliderView.isAutoCycle = sliderStartAutoCycle
-            setIndicatorEnabled(indicatorEnabled)
-
-            if (mIsIndicatorEnabled) {
+    private fun setUpAttributes(attrs: AttributeSet) {
+        context.withStyledAttributes(attrs, R.styleable.SliderView) {
+            setSliderAnimationDuration(getInt(R.styleable.SliderView_sliderAnimationDuration, 250))
+            scrollTimeInSec = getInt(R.styleable.SliderView_sliderScrollTimeInSec, 2)
+            autoCycleDirection = getInt(R.styleable.SliderView_sliderAutoCycleDirection, 0)
+            val autoCycleEnabled = getBoolean(R.styleable.SliderView_sliderAutoCycleEnabled, true)
+            isAutoCycle = getBoolean(R.styleable.SliderView_sliderStartAutoCycle, false) || autoCycleEnabled
+            
+            if (isAutoCycle) startAutoCycle()
+            
+            if (getBoolean(R.styleable.SliderView_sliderIndicatorEnabled, true)) {
                 initIndicator()
-                val indicatorOrientation = getInt(
-                    R.styleable.SliderView_sliderIndicatorOrientation,
-                    Orientation.HORIZONTAL.ordinal
-                )
-                val orientation = if (indicatorOrientation == 0) {
-                    Orientation.HORIZONTAL
-                } else {
-                    Orientation.VERTICAL
+                pagerIndicator?.apply {
+                    setOrientation(if (getInt(R.styleable.SliderView_sliderIndicatorOrientation, 0) == 0) Orientation.HORIZONTAL else Orientation.VERTICAL)
+                    radius = getDimension(R.styleable.SliderView_sliderIndicatorRadius, DensityUtils.dpToPx(2).toFloat()).toInt()
+                    padding = getDimension(R.styleable.SliderView_sliderIndicatorPadding, DensityUtils.dpToPx(3).toFloat()).toInt()
+                    val margin = getDimension(R.styleable.SliderView_sliderIndicatorMargin, DensityUtils.dpToPx(12).toFloat()).toInt()
+                    setIndicatorMargins(
+                        getDimension(R.styleable.SliderView_sliderIndicatorMarginLeft, margin.toFloat()).toInt(),
+                        getDimension(R.styleable.SliderView_sliderIndicatorMarginTop, margin.toFloat()).toInt(),
+                        getDimension(R.styleable.SliderView_sliderIndicatorMarginRight, margin.toFloat()).toInt(),
+                        getDimension(R.styleable.SliderView_sliderIndicatorMarginBottom, margin.toFloat()).toInt()
+                    )
+                    setIndicatorGravity(getInt(R.styleable.SliderView_sliderIndicatorGravity, Gravity.CENTER or Gravity.BOTTOM))
+                    selectedColor = getColor(R.styleable.SliderView_sliderIndicatorSelectedColor, "#ffffff".toColorInt())
+                    unselectedColor = getColor(R.styleable.SliderView_sliderIndicatorUnselectedColor, "#33ffffff".toColorInt())
+                    animationDuration = getInt(R.styleable.SliderView_sliderIndicatorAnimationDuration, BaseAnimation.DEFAULT_ANIMATION_TIME).toLong()
+                    setRtlMode(RtlMode.entries.getOrNull(getInt(R.styleable.SliderView_sliderIndicatorRtlMode, RtlMode.Off.ordinal)) ?: RtlMode.Auto)
                 }
-                val indicatorRadius = getDimension(
-                    R.styleable.SliderView_sliderIndicatorRadius, DensityUtils.dpToPx(2).toFloat()
-                ).toInt()
-                val indicatorPadding = getDimension(
-                    R.styleable.SliderView_sliderIndicatorPadding, DensityUtils.dpToPx(3).toFloat()
-                ).toInt()
-                val indicatorMargin = getDimension(
-                    R.styleable.SliderView_sliderIndicatorMargin, DensityUtils.dpToPx(12).toFloat()
-                ).toInt()
-                val indicatorMarginLeft = getDimension(
-                    R.styleable.SliderView_sliderIndicatorMarginLeft,
-                    DensityUtils.dpToPx(12).toFloat()
-                ).toInt()
-                val indicatorMarginTop = getDimension(
-                    R.styleable.SliderView_sliderIndicatorMarginTop,
-                    DensityUtils.dpToPx(12).toFloat()
-                ).toInt()
-                val indicatorMarginRight = getDimension(
-                    R.styleable.SliderView_sliderIndicatorMarginRight,
-                    DensityUtils.dpToPx(12).toFloat()
-                ).toInt()
-                val indicatorMarginBottom = getDimension(
-                    R.styleable.SliderView_sliderIndicatorMarginBottom,
-                    DensityUtils.dpToPx(12).toFloat()
-                ).toInt()
-                val indicatorGravity = getInt(
-                    R.styleable.SliderView_sliderIndicatorGravity, Gravity.CENTER or Gravity.BOTTOM
-                )
-                val indicatorUnselectedColor = getColor(
-                    R.styleable.SliderView_sliderIndicatorUnselectedColor, "#33ffffff".toColorInt()
-                )
-                val indicatorSelectedColor = getColor(
-                    R.styleable.SliderView_sliderIndicatorSelectedColor, "#ffffff".toColorInt()
-                )
-                val indicatorAnimationDuration = getInt(
-                    R.styleable.SliderView_sliderIndicatorAnimationDuration,
-                    BaseAnimation.DEFAULT_ANIMATION_TIME
-                )
-                val indicatorRtlMode = getInt(
-                    R.styleable.SliderView_sliderIndicatorRtlMode, RtlMode.Off.ordinal
-                )
-                val rtlMode: RtlMode = RtlMode.entries.getOrNull(indicatorRtlMode) ?: RtlMode.Auto
-
-                setIndicatorOrientation(orientation)
-                this@SliderView.indicatorRadius = indicatorRadius
-                setIndicatorPadding(indicatorPadding)
-                setIndicatorMargin(indicatorMargin)
-                setIndicatorMarginCustom(
-                    indicatorMarginLeft,
-                    indicatorMarginTop,
-                    indicatorMarginRight,
-                    indicatorMarginBottom
-                )
-                setIndicatorGravity(indicatorGravity)
-                setIndicatorMargins(
-                    indicatorMarginLeft,
-                    indicatorMarginTop,
-                    indicatorMarginRight,
-                    indicatorMarginBottom
-                )
-                this@SliderView.indicatorUnselectedColor = indicatorUnselectedColor
-                this@SliderView.indicatorSelectedColor = indicatorSelectedColor
-                setIndicatorAnimationDuration(indicatorAnimationDuration.toLong())
-                setIndicatorRtlMode(rtlMode)
             }
         }
     }
 
     private fun initIndicator() {
-        if (this.pagerIndicator == null) {
-            this.pagerIndicator = PageIndicatorView(context)
-            val params = LayoutParams(
-                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT
-            )
-            params.gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
-            params.setMargins(20, 20, 20, 20)
-            addView(this.pagerIndicator, 1, params)
+        if (pagerIndicator == null) {
+            pagerIndicator = PageIndicatorView(context).apply {
+                setDynamicCount(true)
+                setViewPager(mSliderPager)
+            }
+            addView(pagerIndicator, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+                setMargins(20, 20, 20, 20)
+            })
         }
-        pagerIndicator?.setViewPager(mSliderPager)
-        pagerIndicator?.setDynamicCount(true)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupSlideView(context: Context) {
-        val pager = SliderPager(context, null)
-        mSliderPager = pager
-        pager.overScrollMode = OVER_SCROLL_IF_CONTENT_SCROLLS
-        pager.id = generateViewId()
-        val sliderParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        addView(pager, 0, sliderParams)
-        pager.setOnTouchListener(this)
-        pager.addOnPageChangeListener(this)
+    fun setSliderAdapter(adapter: SliderViewAdapter<*>) {
+        setSliderAdapter(adapter, true)
     }
 
-    fun setOnIndicatorClickListener(listener: ClickListener?) {
-        pagerIndicator?.setClickListener(listener)
-    }
-
-    fun setCurrentPageListener(listener: OnSliderPageListener?) {
-        this.mPageListener = listener
-    }
-
-    fun setSliderAdapter(pagerAdapter: SliderViewAdapter<*>) {
-        mPagerAdapter = pagerAdapter
-        val infiniteAdapter = InfinitePagerAdapter(pagerAdapter)
-        mInfinitePagerAdapter = infiniteAdapter
-        mSliderPager?.adapter = infiniteAdapter
-        pagerAdapter.dataSetChangedListener(this)
-        this.currentPagePosition = 0
-    }
-
-    fun setSliderAdapter(pagerAdapter: SliderViewAdapter<*>, infiniteAdapter: Boolean) {
-        mIsInfiniteAdapter = infiniteAdapter
-        if (!infiniteAdapter) {
-            mPagerAdapter = pagerAdapter
-            mSliderPager?.adapter = pagerAdapter
-        } else {
-            setSliderAdapter(pagerAdapter)
-        }
+    fun setSliderAdapter(adapter: SliderViewAdapter<*>, infinite: Boolean) {
+        this.sliderAdapter = adapter
+        this.isInfiniteAdapter = infinite
+        mSliderPager?.adapter = if (infinite) InfinitePagerAdapter(adapter) else adapter
+        adapter.dataSetChangedListener(this)
+        currentPagePosition = 0
     }
 
     fun setInfiniteAdapterEnabled(enabled: Boolean) {
-        val adapter = mPagerAdapter
-        if (adapter != null) {
-            setSliderAdapter(adapter, enabled)
-        }
+        val adapter = sliderAdapter as? SliderViewAdapter<*>
+        if (adapter != null) setSliderAdapter(adapter, enabled)
     }
 
-    val sliderPager: SliderPager
-        get() = mSliderPager ?: SliderPager(context, null)
-
-    val sliderAdapter: PagerAdapter?
-        get() = mPagerAdapter
-
-    fun setOffscreenPageLimit(limit: Int) {
-        mSliderPager?.offscreenPageLimit = limit
-    }
-
-    var scrollTimeInSec: Int
-        get() = this.scrollTimeInMillis / 1000
-        set(time) {
-            this.scrollTimeInMillis = time * 1000
-        }
+    fun setOffscreenPageLimit(limit: Int) { mSliderPager?.offscreenPageLimit = limit }
 
     fun setSliderTransformAnimation(animation: SliderAnimations) {
         mSliderPager?.setPageTransformer(false, SmartTransformer(animation))
     }
 
-    override fun onTouch(v: View?, event: MotionEvent): Boolean {
-        if (this.isAutoCycle) {
-            if (event.action == MotionEvent.ACTION_MOVE) {
-                stopAutoCycle()
-            } else if (event.action == MotionEvent.ACTION_UP) {
-                mHandler.postDelayed({ startAutoCycle() }, 2000)
-            }
-        }
-        return false
+    fun setCustomSliderTransformAnimation(transformer: SliderPager.PageTransformer?) {
+        mSliderPager?.setPageTransformer(false, transformer)
     }
 
-    fun setCustomSliderTransformAnimation(animation: SliderPager.PageTransformer?) {
-        mSliderPager?.setPageTransformer(false, animation)
-    }
-
-    fun setSliderAnimationDuration(duration: Int) {
-        mSliderPager?.setScrollDuration(duration)
-    }
+    fun setSliderAnimationDuration(duration: Int) = mSliderPager?.setScrollDuration(duration)
 
     fun setSliderAnimationDuration(duration: Int, interpolator: Interpolator?) {
         mSliderPager?.setScrollDuration(duration, interpolator)
     }
-
-    var currentPagePosition: Int
-        get() {
-            if (this.sliderAdapter != null) {
-                return this.sliderPager.currentItem
-            } else {
-                throw NullPointerException("Adapter not set")
-            }
-        }
-        set(position) {
-            mSliderPager?.setCurrentItem(position, true)
-        }
 
     fun setPageIndicatorView(indicatorView: PageIndicatorView?) {
         this.pagerIndicator = indicatorView
@@ -284,188 +159,91 @@ class SliderView : FrameLayout, Runnable, OnTouchListener, DataSetListener,
     }
 
     fun setIndicatorEnabled(enabled: Boolean) {
-        this.mIsIndicatorEnabled = enabled
-        if (this.pagerIndicator == null && enabled) {
-            initIndicator()
-        }
+        if (enabled && pagerIndicator == null) initIndicator()
+        pagerIndicator?.visibility = if (enabled) VISIBLE else GONE
     }
 
-    fun setIndicatorAnimationDuration(duration: Long) {
-        pagerIndicator?.animationDuration = duration
-    }
+    fun setIndicatorAnimationDuration(duration: Long) { pagerIndicator?.animationDuration = duration }
 
-    fun setIndicatorGravity(gravity: Int) {
-        val indicator = pagerIndicator ?: return
-        val layoutParams = indicator.layoutParams as LayoutParams
-        layoutParams.gravity = gravity
-        indicator.layoutParams = layoutParams
-    }
+    fun setIndicatorGravity(gravity: Int) = pagerIndicator?.let { (it.layoutParams as LayoutParams).gravity = gravity; it.requestLayout() }
 
-    fun setIndicatorPadding(padding: Int) {
-        pagerIndicator?.setPadding(padding.toFloat())
-    }
+    fun setIndicatorPadding(padding: Int) { pagerIndicator?.padding = padding }
 
-    fun setIndicatorMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        val indicator = pagerIndicator ?: return
-        val layoutParams = indicator.layoutParams as LayoutParams
-        layoutParams.setMargins(left, top, right, bottom)
-        indicator.layoutParams = layoutParams
-    }
+    fun setIndicatorMargins(l: Int, t: Int, r: Int, b: Int) = pagerIndicator?.let { (it.layoutParams as LayoutParams).setMargins(l, t, r, b); it.requestLayout() }
 
-    fun setIndicatorOrientation(orientation: Orientation?) {
-        pagerIndicator?.setOrientation(orientation)
-    }
+    fun setIndicatorMargin(margin: Int) = setIndicatorMargins(margin, margin, margin, margin)
 
-    fun setIndicatorAnimation(animation: IndicatorAnimationType?) {
-        pagerIndicator?.setAnimationType(animation)
-    }
+    fun setIndicatorMarginCustom(l: Int, t: Int, r: Int, b: Int) = setIndicatorMargins(l, t, r, b)
 
-    fun setIndicatorVisibility(visibility: Boolean) {
-        pagerIndicator?.visibility = if (visibility) VISIBLE else GONE
-    }
+    fun setIndicatorOrientation(o: Orientation?) { pagerIndicator?.setOrientation(o) }
 
-    private val adapterItemsCount: Int
-        get() {
-            return try {
-                this.sliderAdapter?.count ?: 0
-            } catch (_: NullPointerException) {
-                Log.e(
-                    TAG,
-                    "getAdapterItemsCount: Slider Adapter is null so, it can't get count of items"
-                )
-                0
-            }
-        }
+    fun setIndicatorAnimation(animation: IndicatorAnimationType?) = pagerIndicator?.setAnimationType(animation)
+
+    fun setIndicatorVisibility(visibility: Boolean) { pagerIndicator?.visibility = if (visibility) VISIBLE else GONE }
+
+    fun setIndicatorRtlMode(rtlMode: RtlMode?) { pagerIndicator?.setRtlMode(rtlMode) }
+
+    fun setOnIndicatorClickListener(l: DrawController.ClickListener?) = pagerIndicator?.setClickListener(l)
+
+    fun setCurrentPageListener(listener: OnSliderPageListener?) { this.mPageListener = listener }
 
     fun startAutoCycle() {
         mHandler.removeCallbacks(this)
         mHandler.postDelayed(this, scrollTimeInMillis.toLong())
     }
 
-    fun stopAutoCycle() {
-        mHandler.removeCallbacks(this)
-    }
+    fun stopAutoCycle() = mHandler.removeCallbacks(this)
 
-    var indicatorRadius: Int
-        get() = pagerIndicator?.radius ?: 0
-        set(pagerIndicatorRadius) {
-            this.pagerIndicator?.radius = pagerIndicatorRadius
+    override fun onTouch(v: View?, event: MotionEvent): Boolean {
+        if (isAutoCycle) {
+            if (event.action == MotionEvent.ACTION_MOVE) stopAutoCycle()
+            else if (event.action == MotionEvent.ACTION_UP) mHandler.postDelayed({ startAutoCycle() }, 2000)
         }
-
-    fun setIndicatorRtlMode(rtlMode: RtlMode?) {
-        pagerIndicator?.setRtlMode(rtlMode)
+        return false
     }
-
-    fun setIndicatorMargin(margin: Int) {
-        val indicator = pagerIndicator ?: return
-        val layoutParams = indicator.layoutParams as LayoutParams
-        layoutParams.setMargins(margin, margin, margin, margin)
-        indicator.layoutParams = layoutParams
-    }
-
-    fun setIndicatorMarginCustom(left: Int, top: Int, right: Int, bottom: Int) {
-        val indicator = pagerIndicator ?: return
-        val layoutParams = indicator.layoutParams as LayoutParams
-        layoutParams.setMargins(left, top, right, bottom)
-        indicator.layoutParams = layoutParams
-    }
-
-    var indicatorSelectedColor: Int
-        get() = this.pagerIndicator?.selectedColor ?: 0
-        set(color) {
-            this.pagerIndicator?.selectedColor = color
-        }
-
-    var indicatorUnselectedColor: Int
-        get() = this.pagerIndicator?.unselectedColor ?: 0
-        set(color) {
-            this.pagerIndicator?.unselectedColor = color
-        }
 
     override fun run() {
-        try {
-            slideToNextPosition()
-        } finally {
-            if (this.isAutoCycle) {
-                mHandler.postDelayed(this, scrollTimeInMillis.toLong())
-            }
-        }
+        try { slideToNextPosition() } finally { if (isAutoCycle) mHandler.postDelayed(this, scrollTimeInMillis.toLong()) }
     }
 
-    fun slideToNextPosition() {
-        val pager = mSliderPager ?: return
-        val currentPosition = pager.currentItem
-        val itemsCount = this.adapterItemsCount
-        if (itemsCount > 1) {
-            if (this.autoCycleDirection == AUTO_CYCLE_DIRECTION_BACK_AND_FORTH) {
-                if (currentPosition % (itemsCount - 1) == 0 && mPreviousPosition != itemsCount - 1 && mPreviousPosition != 0) {
-                    mFlagBackAndForth = !mFlagBackAndForth
-                }
-                if (mFlagBackAndForth) {
-                    pager.setCurrentItem(currentPosition + 1, true)
-                } else {
-                    pager.setCurrentItem(currentPosition - 1, true)
-                }
-            }
-            if (this.autoCycleDirection == AUTO_CYCLE_DIRECTION_LEFT) {
-                pager.setCurrentItem(currentPosition - 1, true)
-            }
-            if (this.autoCycleDirection == AUTO_CYCLE_DIRECTION_RIGHT) {
-                pager.setCurrentItem(currentPosition + 1, true)
-            }
-        }
-        mPreviousPosition = currentPosition
-    }
+    fun slideToNextPosition() { slide(1) }
 
-    fun slideToPreviousPosition() {
-        val pager = mSliderPager ?: return
-        val currentPosition = pager.currentItem
-        val itemsCount = this.adapterItemsCount
+    fun slideToPreviousPosition() { slide(-1) }
 
-        if (itemsCount > 1) {
-            if (this.autoCycleDirection == AUTO_CYCLE_DIRECTION_BACK_AND_FORTH) {
-                if (currentPosition % (itemsCount - 1) == 0 && mPreviousPosition != itemsCount - 1 && mPreviousPosition != 0) {
-                    mFlagBackAndForth = !mFlagBackAndForth
-                }
-                if (mFlagBackAndForth && currentPosition < mPreviousPosition) {
-                    pager.setCurrentItem(currentPosition - 1, true)
-                } else {
-                    pager.setCurrentItem(currentPosition + 1, true)
-                }
+    private fun slide(direction: Int) {
+        val pager = mSliderPager ?: return
+        val count = try { sliderAdapter?.count ?: 0 } catch (e: Exception) { 0 }
+        if (count <= 1) return
+
+        val nextPos = when (autoCycleDirection) {
+            AUTO_CYCLE_DIRECTION_BACK_AND_FORTH -> {
+                if (pager.currentItem % (count - 1) == 0 && mPreviousPosition != count - 1 && mPreviousPosition != 0) mFlagBackAndForth = !mFlagBackAndForth
+                pager.currentItem + (if (mFlagBackAndForth) direction else -direction)
             }
-            if (this.autoCycleDirection == AUTO_CYCLE_DIRECTION_LEFT) {
-                pager.setCurrentItem(currentPosition + 1, true)
-            }
-            if (this.autoCycleDirection == AUTO_CYCLE_DIRECTION_RIGHT) {
-                pager.setCurrentItem(currentPosition - 1, true)
-            }
+            AUTO_CYCLE_DIRECTION_LEFT -> pager.currentItem - direction
+            else -> pager.currentItem + direction
         }
-        mPreviousPosition = currentPosition
+        mPreviousPosition = pager.currentItem
+        pager.setCurrentItem(nextPos, true)
     }
 
     override fun dataSetChanged() {
-        if (mIsInfiniteAdapter) {
-            mInfinitePagerAdapter?.notifyDataSetChanged()
-            mSliderPager?.setCurrentItem(0, false)
-        }
+        if (isInfiniteAdapter) (mSliderPager?.adapter as? InfinitePagerAdapter)?.notifyDataSetChanged()
+        mSliderPager?.setCurrentItem(0, false)
     }
-
-    override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 
     override fun onPageSelected(position: Int) {
-        mPageListener?.onSliderPageChanged(position)
+        val realPos = mSliderPager?.currentItem ?: position
+        mPageListener?.onSliderPageChanged(realPos)
     }
-
+    override fun onPageScrolled(pos: Int, off: Float, offPx: Int) {}
     override fun onPageScrollStateChanged(state: Int) {}
 
-    interface OnSliderPageListener {
-        fun onSliderPageChanged(position: Int)
-    }
+    interface OnSliderPageListener { fun onSliderPageChanged(position: Int) }
 
     companion object {
-        const val AUTO_CYCLE_DIRECTION_RIGHT: Int = 0
-        const val AUTO_CYCLE_DIRECTION_LEFT: Int = 1
-        const val AUTO_CYCLE_DIRECTION_BACK_AND_FORTH: Int = 2
-        const val TAG: String = "Slider View : "
+        const val AUTO_CYCLE_DIRECTION_RIGHT = 0
+        const val AUTO_CYCLE_DIRECTION_LEFT = 1
+        const val AUTO_CYCLE_DIRECTION_BACK_AND_FORTH = 2
     }
 }
