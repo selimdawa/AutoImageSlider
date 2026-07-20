@@ -1,44 +1,58 @@
 package io.selimdawa.autoimageslider.adapter
 
-import android.database.DataSetObserver
-import android.os.Parcelable
-import android.view.View
 import android.view.ViewGroup
-import androidx.viewpager.widget.PagerAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
 
-class InfinitePagerAdapter(private val adapter: SliderViewAdapter<*>) : PagerAdapter() {
-    val realCount get() = runCatching { adapter.count }.getOrDefault(0)
+class InfinitePagerAdapter<VH : RecyclerView.ViewHolder>(
+    private val adapter: RecyclerView.Adapter<VH>
+) : RecyclerView.Adapter<VH>() {
 
-    override fun getCount() = if (realCount < 1) 0 else realCount * INFINITE_SCROLL_LIMIT
-    fun getMiddlePosition(item: Int) = item + (max(0, realCount) * (INFINITE_SCROLL_LIMIT / 2))
+    init {
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onChanged() {
+                notifyDataSetChanged()
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+                notifyDataSetChanged()
+            }
+
+            override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
+                notifyDataSetChanged()
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                notifyDataSetChanged()
+            }
+
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                notifyDataSetChanged()
+            }
+
+            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+                notifyDataSetChanged()
+            }
+        })
+    }
+
+    val realCount get() = adapter.itemCount
+
+    override fun getItemCount() = if (realCount < 1) 0 else INFINITE_SCROLL_LIMIT
+
+    fun getMiddlePosition(item: Int) =
+        (INFINITE_SCROLL_LIMIT / 2) - ((INFINITE_SCROLL_LIMIT / 2) % max(1, realCount)) + item
+
     fun getRealPosition(virtualPos: Int) = if (realCount > 0) virtualPos % realCount else 0
 
-    override fun instantiateItem(container: ViewGroup, virtualPos: Int) =
-        adapter.instantiateItem(container, getRealPosition(virtualPos))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
+        adapter.onCreateViewHolder(parent, viewType)
 
-    override fun destroyItem(container: ViewGroup, virtualPos: Int, obj: Any) =
-        adapter.destroyItem(container, getRealPosition(virtualPos), obj)
+    override fun onBindViewHolder(holder: VH, position: Int) =
+        adapter.onBindViewHolder(holder, getRealPosition(position))
 
-    override fun startUpdate(container: ViewGroup) = adapter.startUpdate(container)
-    override fun finishUpdate(container: ViewGroup) = adapter.finishUpdate(container)
-    override fun isViewFromObject(view: View, obj: Any) = adapter.isViewFromObject(view, obj)
-    override fun restoreState(bundle: Parcelable?, classLoader: ClassLoader?) =
-        adapter.restoreState(bundle, classLoader)
-
-    override fun saveState() = adapter.saveState()
-    override fun getPageTitle(virtualPos: Int) = adapter.getPageTitle(getRealPosition(virtualPos))
-    override fun getPageWidth(position: Int) = adapter.getPageWidth(position)
-    override fun setPrimaryItem(container: ViewGroup, position: Int, obj: Any) =
-        adapter.setPrimaryItem(container, position, obj)
-
-    override fun unregisterDataSetObserver(observer: DataSetObserver) =
-        adapter.unregisterDataSetObserver(observer)
-
-    override fun registerDataSetObserver(observer: DataSetObserver) =
-        adapter.registerDataSetObserver(observer)
-
-    override fun getItemPosition(obj: Any) = adapter.getItemPosition(obj)
+    override fun getItemViewType(position: Int) = adapter.getItemViewType(getRealPosition(position))
+    override fun getItemId(position: Int) = adapter.getItemId(getRealPosition(position))
 
     companion object {
         const val INFINITE_SCROLL_LIMIT = 32400

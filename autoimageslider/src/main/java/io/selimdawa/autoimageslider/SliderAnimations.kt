@@ -1,6 +1,5 @@
 package io.selimdawa.autoimageslider
 
-@Suppress("unused")
 enum class SliderAnimations(
     val cameraDist: Float = 0f,
     val rotationFactor: Float = 0f,
@@ -10,44 +9,44 @@ enum class SliderAnimations(
     val hasScaleY: Boolean = false,
     val scaleMode: Int = 0
 ) {
-    ANTICLOCKSPINTRANSFORMATION, CLOCK_SPINTRANSFORMATION, CUBEINDEPTHTRANSFORMATION(
+    ANTICLOCK_SPIN, CLOCK_SPIN, CUBE_IN_DEPTH(
         cameraDist = 20000f, rotationFactor = 90f, isCubeIn = true, hasScaleY = true, scaleMode = 1
     ),
-    CUBEINROTATIONTRANSFORMATION(
+    CUBE_IN_ROTATION(
         cameraDist = 20000f, rotationFactor = 90f, isCubeIn = true
     ),
-    CUBEINSCALINGTRANSFORMATION(
+    CUBE_IN_SCALING(
         cameraDist = 20000f, rotationFactor = 90f, isCubeIn = true, hasScaleY = true, scaleMode = 2
     ),
-    CUBEOUTDEPTHTRANSFORMATION(
+    CUBE_OUT_DEPTH(
         rotationFactor = -90f, isCubeOut = true, hasScaleY = true, scaleMode = 1
     ),
-    CUBEOUTROTATIONTRANSFORMATION(
+    CUBE_OUT_ROTATION(
         rotationFactor = -90f, isCubeOut = true
     ),
-    CUBEOUTSCALINGTRANSFORMATION(
+    CUBE_OUT_SCALING(
         rotationFactor = -90f, isCubeOut = true, hasScaleY = true, scaleMode = 2
     ),
-    DEPTHTRANSFORMATION, FADETRANSFORMATION, FANTRANSFORMATION(
+    DEPTH, FADE, FAN(
         cameraDist = 20000f, rotationFactor = -120f
     ),
-    FIDGETSPINTRANSFORMATION, GATETRANSFORMATION(
+    FIDGET_SPIN, GATE(
         rotationFactor = 90f, isCubeIn = true
     ),
-    HINGETRANSFORMATION, HORIZONTALFLIPTRANSFORMATION(
+    HINGE, HORIZONTAL_FLIP(
         cameraDist = 20000f, rotationFactor = 180f, useXAxis = true
     ),
-    POPTRANSFORMATION, SIMPLETRANSFORMATION, SPINNERTRANSFORMATION(
+    POP, SIMPLE, SPINNER(
         cameraDist = 12000f, rotationFactor = 900f
     ),
-    TOSSTRANSFORMATION(
+    TOSS(
         cameraDist = 20000f, rotationFactor = 1080f, useXAxis = true
     ),
-    VERTICALFLIPTRANSFORMATION(
+    VERTICAL_FLIP(
         cameraDist = 12000f, rotationFactor = 180f
     ),
-    VERTICALSHUTTRANSFORMATION(
+    VERTICAL_SHUT(
         cameraDist = 1.0E9f, rotationFactor = 180f, useXAxis = true
     ),
-    ZOOMOUTTRANSFORMATION
+    ZOOM_OUT
 }

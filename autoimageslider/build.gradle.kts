@@ -32,7 +32,7 @@ android {
 mavenPublishing {
 
     coordinates(
-        groupId = "io.github.selimdawa", artifactId = "auto-image-slider", version = "1.0.0"
+        groupId = "io.github.selimdawa", artifactId = "auto-image-slider", version = "1.0.1"
     )
 
     publishToMavenCentral(automaticRelease = true)
@@ -70,5 +70,8 @@ mavenPublishing {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.viewpager)
+    implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.coil)
 }

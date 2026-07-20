@@ -39,8 +39,8 @@ abstract class BaseAnimation<T : Animator?>(protected var listener: ValueControl
 
 open class ColorAnimation(listener: ValueController.UpdateListener?) :
     BaseAnimation<ValueAnimator?>(listener) {
-    private val value = ColorAnimationValue()
-    var colorStart = 0;
+    protected val value = ColorAnimationValue()
+    var colorStart = 0
     var colorEnd = 0
 
     override fun createAnimator() = ValueAnimator().apply {
@@ -50,7 +50,7 @@ open class ColorAnimation(listener: ValueController.UpdateListener?) :
     }
 
     override fun progress(progress: Float) = this.apply {
-        animator?.takeIf { !it.values.isNullOrEmpty() }?.currentPlayTime =
+        animator?.takeIf { it.values != null && it.values.isNotEmpty() }?.currentPlayTime =
             (progress * animationDuration).toLong()
     }
 
@@ -80,8 +80,8 @@ open class ColorAnimation(listener: ValueController.UpdateListener?) :
 }
 
 class FillAnimation(listener: ValueController.UpdateListener) : ColorAnimation(listener) {
-    private val value = FillAnimationValue()
-    private var radius = 0;
+    private val fillValue = FillAnimationValue()
+    private var radius = 0
     private var stroke = 0
 
     override fun createAnimator() = ValueAnimator().apply {
@@ -118,20 +118,20 @@ class FillAnimation(listener: ValueController.UpdateListener) : ColorAnimation(l
     ).apply { setEvaluator(IntEvaluator()) }
 
     private fun onAnimateUpdated(animation: ValueAnimator) {
-        value.color = animation.getAnimatedValue(ANIMATION_COLOR) as Int
-        value.colorReverse = animation.getAnimatedValue(ANIMATION_COLOR_REVERSE) as Int
-        value.radius = animation.getAnimatedValue("ANIMATION_RADIUS") as Int
-        value.radiusReverse = animation.getAnimatedValue("ANIMATION_RADIUS_REVERSE") as Int
-        value.stroke = animation.getAnimatedValue("ANIMATION_STROKE") as Int
-        value.strokeReverse = animation.getAnimatedValue("ANIMATION_STROKE_REVERSE") as Int
-        listener?.onValueUpdated(value)
+        fillValue.color = animation.getAnimatedValue(ANIMATION_COLOR) as Int
+        fillValue.colorReverse = animation.getAnimatedValue(ANIMATION_COLOR_REVERSE) as Int
+        fillValue.radius = animation.getAnimatedValue("ANIMATION_RADIUS") as Int
+        fillValue.radiusReverse = animation.getAnimatedValue("ANIMATION_RADIUS_REVERSE") as Int
+        fillValue.stroke = animation.getAnimatedValue("ANIMATION_STROKE") as Int
+        fillValue.strokeReverse = animation.getAnimatedValue("ANIMATION_STROKE_REVERSE") as Int
+        listener?.onValueUpdated(fillValue)
     }
 }
 
 open class ScaleAnimation(listener: ValueController.UpdateListener) : ColorAnimation(listener) {
     var radius = 0
     var scaleFactor = 0f
-    private val value = ScaleAnimationValue()
+    protected val scaleValue = ScaleAnimationValue()
 
     override fun createAnimator() = ValueAnimator().apply {
         duration = DEFAULT_ANIMATION_TIME.toLong()
@@ -139,7 +139,7 @@ open class ScaleAnimation(listener: ValueController.UpdateListener) : ColorAnima
         addUpdateListener { onAnimateUpdated(it) }
     }
 
-    fun with(colorStart: Int, colorEnd: Int, radius: Int, scaleFactor: Float) = this.apply {
+    open fun with(colorStart: Int, colorEnd: Int, radius: Int, scaleFactor: Float) = this.apply {
         if (animator != null && (this.colorStart != colorStart || this.colorEnd != colorEnd || this.radius != radius || this.scaleFactor != scaleFactor)) {
             this.colorStart = colorStart; this.colorEnd = colorEnd; this.radius =
                 radius; this.scaleFactor = scaleFactor
@@ -153,11 +153,11 @@ open class ScaleAnimation(listener: ValueController.UpdateListener) : ColorAnima
     }
 
     private fun onAnimateUpdated(animation: ValueAnimator) {
-        value.color = animation.getAnimatedValue(ANIMATION_COLOR) as Int
-        value.colorReverse = animation.getAnimatedValue(ANIMATION_COLOR_REVERSE) as Int
-        value.radius = animation.getAnimatedValue(ANIMATION_SCALE) as Int
-        value.radiusReverse = animation.getAnimatedValue(ANIMATION_SCALE_REVERSE) as Int
-        listener?.onValueUpdated(value)
+        scaleValue.color = animation.getAnimatedValue(ANIMATION_COLOR) as Int
+        scaleValue.colorReverse = animation.getAnimatedValue(ANIMATION_COLOR_REVERSE) as Int
+        scaleValue.radius = animation.getAnimatedValue(ANIMATION_SCALE) as Int
+        scaleValue.radiusReverse = animation.getAnimatedValue(ANIMATION_SCALE_REVERSE) as Int
+        listener?.onValueUpdated(scaleValue)
     }
 
     protected open fun createScalePropertyHolder(isReverse: Boolean): PropertyValuesHolder? =
@@ -174,17 +174,34 @@ open class ScaleAnimation(listener: ValueController.UpdateListener) : ColorAnima
 }
 
 class ScaleDownAnimation(listener: ValueController.UpdateListener) : ScaleAnimation(listener) {
+
     override fun createScalePropertyHolder(isReverse: Boolean) = PropertyValuesHolder.ofInt(
         if (isReverse) ANIMATION_SCALE_REVERSE else ANIMATION_SCALE,
         if (isReverse) (radius * scaleFactor).toInt() else radius,
         if (isReverse) radius else (radius * scaleFactor).toInt()
     ).apply { setEvaluator(IntEvaluator()) }!!
+
+    override fun with(
+        colorStart: Int, colorEnd: Int, radius: Int, scaleFactor: Float
+    ): ScaleAnimation {
+        if (animator != null && (this.colorStart != colorStart || this.colorEnd != colorEnd || this.radius != radius || this.scaleFactor != scaleFactor)) {
+            this.colorStart = colorStart; this.colorEnd = colorEnd; this.radius =
+                radius; this.scaleFactor = scaleFactor
+            animator?.setValues(
+                createColorPropertyHolder(false),
+                createColorPropertyHolder(true),
+                createScalePropertyHolder(false),
+                createScalePropertyHolder(true)
+            )
+        }
+        return this
+    }
 }
 
 class SlideAnimation(listener: ValueController.UpdateListener) :
     BaseAnimation<ValueAnimator?>(listener) {
-    private val value = SlideAnimationValue()
-    private var coordinateStart = -1;
+    private val slideValue = SlideAnimationValue()
+    private var coordinateStart = -1
     private var coordinateEnd = -1
 
     override fun createAnimator() = ValueAnimator().apply {
@@ -194,7 +211,7 @@ class SlideAnimation(listener: ValueController.UpdateListener) :
     }
 
     override fun progress(progress: Float) = this.apply {
-        animator?.takeIf { !it.values.isNullOrEmpty() }?.currentPlayTime =
+        animator?.takeIf { it.values != null && it.values.isNotEmpty() }?.currentPlayTime =
             (progress * animationDuration).toLong()
     }
 
@@ -209,16 +226,16 @@ class SlideAnimation(listener: ValueController.UpdateListener) :
     }
 
     private fun onAnimateUpdated(animation: ValueAnimator) {
-        value.coordinate = animation.getAnimatedValue("ANIMATION_COORDINATE") as Int
-        listener?.onValueUpdated(value)
+        slideValue.coordinate = animation.getAnimatedValue("ANIMATION_COORDINATE") as Int
+        listener?.onValueUpdated(slideValue)
     }
 }
 
 class SwapAnimation(listener: ValueController.UpdateListener) :
     BaseAnimation<ValueAnimator?>(listener) {
-    private var coordinateStart = -1;
+    private var coordinateStart = -1
     private var coordinateEnd = -1
-    private val value = SwapAnimationValue()
+    private val swapValue = SwapAnimationValue()
 
     override fun createAnimator() = ValueAnimator().apply {
         duration = DEFAULT_ANIMATION_TIME.toLong()
@@ -227,7 +244,7 @@ class SwapAnimation(listener: ValueController.UpdateListener) :
     }
 
     override fun progress(progress: Float) = this.apply {
-        animator?.takeIf { !it.values.isNullOrEmpty() }?.currentPlayTime =
+        animator?.takeIf { it.values != null && it.values.isNotEmpty() }?.currentPlayTime =
             (progress * animationDuration).toLong()
     }
 
@@ -243,9 +260,10 @@ class SwapAnimation(listener: ValueController.UpdateListener) :
     }
 
     private fun onAnimateUpdated(animation: ValueAnimator) {
-        value.coordinate = animation.getAnimatedValue("ANIMATION_COORDINATE") as Int
-        value.coordinateReverse = animation.getAnimatedValue("ANIMATION_COORDINATE_REVERSE") as Int
-        listener?.onValueUpdated(value)
+        swapValue.coordinate = animation.getAnimatedValue("ANIMATION_COORDINATE") as Int
+        swapValue.coordinateReverse =
+            animation.getAnimatedValue("ANIMATION_COORDINATE_REVERSE") as Int
+        listener?.onValueUpdated(swapValue)
     }
 }
 
@@ -257,7 +275,7 @@ open class WormAnimation(listener: ValueController.UpdateListener) :
     var isRightSide = false
     var rectLeftEdge = 0
     var rectRightEdge = 0
-    protected val value = WormAnimationValue()
+    protected val wormValue = WormAnimationValue()
 
     override fun createAnimator() =
         AnimatorSet().apply { interpolator = AccelerateDecelerateInterpolator() }
@@ -265,29 +283,26 @@ open class WormAnimation(listener: ValueController.UpdateListener) :
     open fun with(coordinateStart: Int, coordinateEnd: Int, radius: Int, isRightSide: Boolean) =
         this.apply {
             if (hasChanges(coordinateStart, coordinateEnd, radius, isRightSide)) {
-                animator = createAnimator().apply {
-                    this@WormAnimation.coordinateStart =
-                        coordinateStart; this@WormAnimation.coordinateEnd = coordinateEnd
-                    this@WormAnimation.radius = radius; this@WormAnimation.isRightSide = isRightSide
-                    rectLeftEdge = coordinateStart - radius; rectRightEdge =
-                    coordinateStart + radius
-                    value.rectStart = rectLeftEdge; value.rectEnd = rectRightEdge
-                    val rect = createRectValues(isRightSide);
-                    val halfDuration = animationDuration / 2
-                    playSequentially(
-                        createWormAnimator(rect.fromX, rect.toX, halfDuration, false, value),
-                        createWormAnimator(
-                            rect.reverseFromX, rect.reverseToX, halfDuration, true, value
-                        )
+                this@WormAnimation.coordinateStart =
+                    coordinateStart; this@WormAnimation.coordinateEnd = coordinateEnd
+                this@WormAnimation.radius = radius; this@WormAnimation.isRightSide = isRightSide
+                rectLeftEdge = coordinateStart - radius; rectRightEdge = coordinateStart + radius
+                wormValue.rectStart = rectLeftEdge; wormValue.rectEnd = rectRightEdge
+                val rect = createRectValues(isRightSide)
+                val halfDuration = animationDuration / 2
+                animator?.playSequentially(
+                    createWormAnimator(rect.fromX, rect.toX, halfDuration, false, wormValue),
+                    createWormAnimator(
+                        rect.reverseFromX, rect.reverseToX, halfDuration, true, wormValue
                     )
-                }
+                )
             }
         }
 
     override fun progress(progress: Float) = this.apply {
         var progressDuration = (progress * animationDuration).toLong()
         animator?.childAnimations?.forEach { anim ->
-            val child = anim as ValueAnimator;
+            val child = anim as ValueAnimator
             val d = child.duration
             val setDuration = if (progressDuration > d) d else progressDuration
             child.currentPlayTime = setDuration; progressDuration -= setDuration
@@ -336,36 +351,33 @@ open class WormAnimation(listener: ValueController.UpdateListener) :
 }
 
 class ThinWormAnimation(listener: ValueController.UpdateListener) : WormAnimation(listener) {
-    private val thinValue = ThinWormAnimationValue()
+    private val thinWormValue = ThinWormAnimationValue()
 
     override fun duration(duration: Long) = this.apply { super.duration(duration) }
 
     override fun with(coordinateStart: Int, coordinateEnd: Int, radius: Int, isRightSide: Boolean) =
         this.apply {
             if (hasChanges(coordinateStart, coordinateEnd, radius, isRightSide)) {
-                animator = createAnimator().apply {
-                    this@ThinWormAnimation.coordinateStart =
-                        coordinateStart; this@ThinWormAnimation.coordinateEnd = coordinateEnd
-                    this@ThinWormAnimation.radius = radius; this@ThinWormAnimation.isRightSide =
+                this@ThinWormAnimation.coordinateStart =
+                    coordinateStart; this@ThinWormAnimation.coordinateEnd = coordinateEnd
+                this@ThinWormAnimation.radius = radius; this@ThinWormAnimation.isRightSide =
                     isRightSide
-                    rectLeftEdge = coordinateStart - radius; rectRightEdge =
-                    coordinateStart + radius
-                    thinValue.rectStart = rectLeftEdge; thinValue.rectEnd =
-                    rectRightEdge; thinValue.height = radius * 2
-                    val rec = createRectValues(isRightSide);
-                    val d = animationDuration
-                    playTogether(
-                        createWormAnimator(
-                            rec.fromX, rec.toX, (d * 0.8).toLong(), false, thinValue
-                        ),
-                        createWormAnimator(
-                            rec.reverseFromX, rec.reverseToX, (d * 0.8).toLong(), true, thinValue
-                        ).apply { startDelay = (d * 0.2).toLong() },
-                        createHeightAnimator(radius * 2, radius, (d * 0.5).toLong()),
-                        createHeightAnimator(
-                            radius, radius * 2, (d * 0.5).toLong()
-                        ).apply { startDelay = (d * 0.5).toLong() })
-                }
+                rectLeftEdge = coordinateStart - radius; rectRightEdge = coordinateStart + radius
+                thinWormValue.rectStart = rectLeftEdge; thinWormValue.rectEnd =
+                    rectRightEdge; thinWormValue.height = radius * 2
+                val rec = createRectValues(isRightSide)
+                val d = animationDuration
+                animator?.playTogether(
+                    createWormAnimator(
+                        rec.fromX, rec.toX, (d * 0.8).toLong(), false, thinWormValue
+                    ),
+                    createWormAnimator(
+                        rec.reverseFromX, rec.reverseToX, (d * 0.8).toLong(), true, thinWormValue
+                    ).apply { startDelay = (d * 0.2).toLong() },
+                    createHeightAnimator(radius * 2, radius, (d * 0.5).toLong()),
+                    createHeightAnimator(
+                        radius, radius * 2, (d * 0.5).toLong()
+                    ).apply { startDelay = (d * 0.5).toLong() })
             }
         }
 
@@ -376,34 +388,34 @@ class ThinWormAnimation(listener: ValueController.UpdateListener) : WormAnimatio
         }
 
     private fun onAnimateUpdated(animation: ValueAnimator) {
-        thinValue.height = animation.animatedValue as Int
-        listener?.onValueUpdated(thinValue)
+        thinWormValue.height = animation.animatedValue as Int
+        listener?.onValueUpdated(thinWormValue)
     }
 
     override fun progress(progress: Float) = this.apply {
         val progressDuration = (progress * animationDuration).toLong()
-        val childAnims = animator?.childAnimations ?: return@apply
-        val size = childAnims.size
-        for (i in 0..<size) {
-            val anim = childAnims[i] as ValueAnimator
+        val childAnimators = animator?.childAnimations ?: return@apply
+        val size = childAnimators.size
+        for (i in 0 until size) {
+            val anim = childAnimators[i] as ValueAnimator
             val setDuration = (progressDuration - anim.startDelay).coerceIn(0, anim.duration)
             if (i == size - 1 && setDuration <= 0) continue
-            if (!anim.values.isNullOrEmpty()) anim.currentPlayTime = setDuration
+            if (anim.values != null && anim.values.isNotEmpty()) anim.currentPlayTime = setDuration
         }
     }
 }
 
 class DropAnimation(listener: ValueController.UpdateListener) :
     BaseAnimation<AnimatorSet?>(listener) {
-    private var widthStart = 0;
+    private var widthStart = 0
     private var widthEnd = 0
-    private var heightStart = 0;
-    private var heightEnd = 0;
+    private var heightStart = 0
+    private var heightEnd = 0
     private var radius = 0
 
     private enum class AnimationType { Width, Height, Radius }
 
-    private val value = DropAnimationValue()
+    private val dropValue = DropAnimationValue()
 
     override fun createAnimator() =
         AnimatorSet().apply { interpolator = AccelerateDecelerateInterpolator() }
@@ -412,11 +424,12 @@ class DropAnimation(listener: ValueController.UpdateListener) :
         val playTimeLeft = (progress * animationDuration).toLong()
         var isReverse = false
         animator?.childAnimations?.forEach { anim ->
-            val valueAnim = anim as ValueAnimator;
+            val valueAnim = anim as ValueAnimator
             val d = valueAnim.duration
             val currPlayTime = if (isReverse) playTimeLeft - d else playTimeLeft
             if (currPlayTime in 0..d) {
-                if (!valueAnim.values.isNullOrEmpty()) valueAnim.currentPlayTime = currPlayTime
+                if (valueAnim.values != null && valueAnim.values.isNotEmpty()) valueAnim.currentPlayTime =
+                    currPlayTime
             }
             if (!isReverse && d >= animationDuration) isReverse = true
         }
@@ -427,35 +440,32 @@ class DropAnimation(listener: ValueController.UpdateListener) :
     fun with(widthStart: Int, widthEnd: Int, heightStart: Int, heightEnd: Int, radius: Int) =
         this.apply {
             if (this.widthStart != widthStart || this.widthEnd != widthEnd || this.heightStart != heightStart || this.heightEnd != heightEnd || this.radius != radius) {
-                animator = createAnimator().apply {
-                    this@DropAnimation.widthStart = widthStart; this@DropAnimation.widthEnd =
-                    widthEnd
-                    this@DropAnimation.heightStart = heightStart; this@DropAnimation.heightEnd =
+                this@DropAnimation.widthStart = widthStart; this@DropAnimation.widthEnd = widthEnd
+                this@DropAnimation.heightStart = heightStart; this@DropAnimation.heightEnd =
                     heightEnd; this@DropAnimation.radius = radius
-                    val toRadius = (radius / 1.5).toInt();
-                    val halfDuration = animationDuration / 2
-                    play(
-                        createValueAnimation(
-                            heightStart, heightEnd, halfDuration, AnimationType.Height
-                        )
-                    ).with(
-                        createValueAnimation(
-                            radius, toRadius, halfDuration, AnimationType.Radius
-                        )
-                    ).with(
-                        createValueAnimation(
-                            widthStart, widthEnd, animationDuration, AnimationType.Width
-                        )
-                    ).before(
-                        createValueAnimation(
-                            heightEnd, heightStart, halfDuration, AnimationType.Height
-                        )
-                    ).before(
-                        createValueAnimation(
-                            toRadius, radius, halfDuration, AnimationType.Radius
-                        )
+                val toRadius = (radius / 1.5).toInt()
+                val halfDuration = animationDuration / 2
+                animator?.play(
+                    createValueAnimation(
+                        heightStart, heightEnd, halfDuration, AnimationType.Height
                     )
-                }
+                )?.with(
+                    createValueAnimation(
+                        radius, toRadius, halfDuration, AnimationType.Radius
+                    )
+                )?.with(
+                    createValueAnimation(
+                        widthStart, widthEnd, animationDuration, AnimationType.Width
+                    )
+                )?.before(
+                    createValueAnimation(
+                        heightEnd, heightStart, halfDuration, AnimationType.Height
+                    )
+                )?.before(
+                    createValueAnimation(
+                        toRadius, radius, halfDuration, AnimationType.Radius
+                    )
+                )
             }
         }
 
@@ -468,10 +478,10 @@ class DropAnimation(listener: ValueController.UpdateListener) :
     private fun onAnimatorUpdate(animation: ValueAnimator, type: AnimationType) {
         val frameValue = animation.animatedValue as Int
         when (type) {
-            AnimationType.Width -> value.width = frameValue
-            AnimationType.Height -> value.height = frameValue
-            AnimationType.Radius -> value.radius = frameValue
+            AnimationType.Width -> dropValue.width = frameValue
+            AnimationType.Height -> dropValue.height = frameValue
+            AnimationType.Radius -> dropValue.radius = frameValue
         }
-        listener?.onValueUpdated(value)
+        listener?.onValueUpdated(dropValue)
     }
 }

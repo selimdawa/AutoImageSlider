@@ -5,13 +5,14 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
+import io.selimdawa.autoimageslider.R
 import io.selimdawa.autoimageslider.view.animation.type.BaseAnimation
 import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
 import io.selimdawa.autoimageslider.view.draw.data.Indicator
+import io.selimdawa.autoimageslider.view.draw.data.IndicatorShape
 import io.selimdawa.autoimageslider.view.draw.data.Orientation
 import io.selimdawa.autoimageslider.view.draw.data.RtlMode
 import io.selimdawa.autoimageslider.view.utils.DensityUtils
-import io.selimdawa.autoimageslider.R
 
 class AttributeController(private val indicator: Indicator) {
 
@@ -61,6 +62,12 @@ class AttributeController(private val indicator: Indicator) {
                         R.styleable.PageIndicatorView_piv_rtl_mode, RtlMode.Off.ordinal
                     )
                 ) ?: RtlMode.Auto
+                indicatorShape = IndicatorShape.entries.getOrNull(
+                    getInt(
+                        R.styleable.PageIndicatorView_piv_indicatorShape,
+                        IndicatorShape.CIRCLE.ordinal
+                    )
+                ) ?: IndicatorShape.CIRCLE
                 this.radius = radius
                 orientation = if (getInt(
                         R.styleable.PageIndicatorView_piv_orientation,

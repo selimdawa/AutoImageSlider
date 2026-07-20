@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Auto Image Slider</string>
-    //Needed
+    <string name="header_title">Auto Image Slider</string>
+    <string name="control_panel_label">Control Panel</string>
     <string name="add_an_item">Add An Item</string>
     <string name="remove_last_item">Remove Last Item</string>
     <string name="renew_items">Renew Items</string>
+    <string name="slider_item_format">Slider Item %1$d</string>
+    <string name="manual_item_description">Slider Item Added Manually</string>
 </resources>

@@ -2,12 +2,13 @@ package io.selimdawa.autoimageslider.view.draw.data
 
 import android.view.View
 import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
+import io.selimdawa.autoimageslider.view.utils.DensityUtils
 
 class Indicator {
     var height = 0
     var width = 0
-    var radius = 0
-    var padding = 0
+    var radius = DensityUtils.dpToPx(DEFAULT_RADIUS_DP)
+    var padding = DensityUtils.dpToPx(DEFAULT_PADDING_DP)
     var paddingLeft = 0
     var paddingTop = 0
     var paddingRight = 0
@@ -26,6 +27,8 @@ class Indicator {
     var lastSelectedPosition = 0
     var viewPagerId = View.NO_ID
 
+    var indicatorShape: IndicatorShape? = null
+        get() = field ?: IndicatorShape.CIRCLE
     var orientation: Orientation? = null
         get() = field ?: Orientation.HORIZONTAL
     var animationType: IndicatorAnimationType? = null

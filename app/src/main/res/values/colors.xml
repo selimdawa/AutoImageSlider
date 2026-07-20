@@ -2,4 +2,19 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#5A5A5A</color>
+
+    <color name="colorPrimary">#fff</color>
+    //Needed
+    <color name="image_profile">#e0e0e0</color>
+    <color name="dark">#000000</color>
+    <color name="black">#212121</color>
+    <color name="white">#ffffff</color>
+    //Day Theme
+    <color name="basic_2">#3c415e</color>
+    <color name="basic_night">#999999</color>
+
+    <color name="app_background">#F5F5F5</color>
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#666666</color>
 </resources>

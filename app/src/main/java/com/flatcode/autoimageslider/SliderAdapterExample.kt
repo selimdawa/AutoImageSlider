@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
 import coil.load
 import com.flatcode.autoimageslider.databinding.ImageSliderLayoutItemBinding
 import io.selimdawa.autoimageslider.adapter.SliderViewAdapter
@@ -14,24 +15,36 @@ class SliderAdapterExample(private val context: Context) :
 
     private var mSliderItems: MutableList<SliderItem> = mutableListOf()
 
-    fun renewItems(sliderItems: MutableList<SliderItem>) {
-        this.mSliderItems = sliderItems
-        notifyDataSetChanged()
+    fun renewItems(newSliderItems: MutableList<SliderItem>) {
+        val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = mSliderItems.size
+            override fun getNewListSize() = newSliderItems.size
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return mSliderItems[oldItemPosition].imageUrl == newSliderItems[newItemPosition].imageUrl
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return mSliderItems[oldItemPosition] == newSliderItems[newItemPosition]
+            }
+        })
+        mSliderItems = newSliderItems
+        diffResult.dispatchUpdatesTo(this)
     }
 
     fun deleteItem(position: Int) {
         if (position in mSliderItems.indices) {
-            this.mSliderItems.removeAt(position)
-            notifyDataSetChanged()
+            mSliderItems.removeAt(position)
+            notifyItemRemoved(position)
         }
     }
 
     fun addItem(sliderItem: SliderItem) {
-        this.mSliderItems.add(sliderItem)
-        notifyDataSetChanged()
+        mSliderItems.add(sliderItem)
+        notifyItemInserted(mSliderItems.size - 1)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup): SliderAdapterVH {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SliderAdapterVH {
         return SliderAdapterVH(
             ImageSliderLayoutItemBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
@@ -39,7 +52,7 @@ class SliderAdapterExample(private val context: Context) :
         )
     }
 
-    override fun onBindViewHolder(viewHolder: SliderAdapterVH, position: Int) {
+    override fun onBind(viewHolder: SliderAdapterVH, position: Int) {
         val sliderItem = mSliderItems[position]
 
         with(viewHolder.binding) {
@@ -56,7 +69,7 @@ class SliderAdapterExample(private val context: Context) :
         }
     }
 
-    override fun getCount(): Int = mSliderItems.size
+    override fun getItemCount(): Int = mSliderItems.size
 
     class SliderAdapterVH(val binding: ImageSliderLayoutItemBinding) : ViewHolder(binding.root)
 }

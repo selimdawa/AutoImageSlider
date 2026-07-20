@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/header_title"
+        android:textColor="@color/text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cv_slider_mainActivity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:id="@+id/cvSliderContainer"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
         android:layout_margin="16dp"
         app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHeader"
         app:strokeWidth="0dp">
 
         <io.selimdawa.autoimageslider.SliderView
             android:id="@+id/imageSlider"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="match_parent"
             app:sliderAnimationDuration="600"
             app:sliderAutoCycleDirection="back_and_forth"
             app:sliderIndicatorAnimationDuration="600"
@@ -26,46 +45,57 @@
             app:sliderIndicatorOrientation="horizontal"
             app:sliderIndicatorPadding="3dp"
             app:sliderIndicatorRadius="2dp"
-            app:sliderIndicatorSelectedColor="#5A5A5A"
-            app:sliderIndicatorUnselectedColor="#FFF"
-            app:sliderScrollTimeInSec="1" />
+            app:sliderIndicatorSelectedColor="@color/gray"
+            app:sliderIndicatorUnselectedColor="@color/white"
+            app:sliderScrollTimeInSec="2" />
 
     </com.google.android.material.card.MaterialCardView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvControlPanel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/cv_slider_mainActivity"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_marginTop="32dp"
+        android:text="@string/control_panel_label"
+        android:textColor="@color/text_secondary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cvSliderContainer" />
 
-        <!-- Filled Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddItem"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/add_an_item" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddItem"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/add_an_item"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvControlPanel" />
 
-        <!-- Outlined Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRemoveItem"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/remove_last_item" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRemoveItem"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/remove_last_item"
+        app:layout_constraintEnd_toEndOf="@id/btnAddItem"
+        app:layout_constraintStart_toStartOf="@id/btnAddItem"
+        app:layout_constraintTop_toBottomOf="@id/btnAddItem" />
 
-        <!-- Text Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRenewItems"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/renew_items" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRenewItems"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/renew_items"
+        app:layout_constraintEnd_toEndOf="@id/btnRemoveItem"
+        app:layout_constraintStart_toStartOf="@id/btnRemoveItem"
+        app:layout_constraintTop_toBottomOf="@id/btnRemoveItem" />
 
-    </LinearLayout>
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

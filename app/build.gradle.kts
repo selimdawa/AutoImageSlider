@@ -12,8 +12,8 @@ android {
         applicationId = "com.flatcode.autoimageslider"
         minSdk = 23
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,14 +36,12 @@ android {
 
 dependencies {
     implementation(project(":autoimageslider"))
-    implementation(libs.androidx.activity.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
+    //Layout
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.material)
     //Image
     implementation(libs.coil)
 }

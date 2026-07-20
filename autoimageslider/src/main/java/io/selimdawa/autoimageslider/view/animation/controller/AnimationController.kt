@@ -11,7 +11,7 @@ class AnimationController(
 ) {
     private val valueController = ValueController(listener)
     private var runningAnimation: BaseAnimation<*>? = null
-    private var progress = 0f;
+    private var progress = 0f
     private var isInteractive = false
 
     fun interactive(progress: Float) {
@@ -25,7 +25,7 @@ class AnimationController(
     fun end() = runningAnimation?.end()
 
     private fun animate() {
-        val (from, to) = getTargetCoordinates();
+        val (from, to) = getTargetCoordinates()
         val duration = indicator.animationDuration
         runningAnimation = when (indicator.animationType) {
             IndicatorAnimationType.NONE, null -> {

@@ -14,6 +14,7 @@ import io.selimdawa.autoimageslider.view.animation.data.Value
 import io.selimdawa.autoimageslider.view.animation.data.WormAnimationValue
 import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
 import io.selimdawa.autoimageslider.view.draw.data.Indicator
+import io.selimdawa.autoimageslider.view.draw.data.IndicatorShape
 import io.selimdawa.autoimageslider.view.draw.data.Orientation
 
 open class BaseDrawer(var paint: Paint?, var indicator: Indicator?)
@@ -33,7 +34,21 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
             strokeWidth = ind.stroke.toFloat()
         } else pnt
         tp.color = if (isSel) ind.selectedColor else ind.unselectedColor
-        canvas.drawCircle(cx.toFloat(), cy.toFloat(), r, tp)
+        drawShape(canvas, cx.toFloat(), cy.toFloat(), r, tp)
+    }
+
+    private fun drawShape(canvas: Canvas, cx: Float, cy: Float, r: Float, p: Paint) {
+        val ind = indicator ?: return
+        when (ind.indicatorShape) {
+            IndicatorShape.SQUARE -> canvas.drawRect(cx - r, cy - r, cx + r, cy + r, p)
+            IndicatorShape.DASH -> {
+                val isH = ind.orientation == Orientation.HORIZONTAL
+                if (isH) rect.set(cx - r * 2, cy - r / 2, cx + r * 2, cy + r / 2)
+                else rect.set(cx - r / 2, cy - r * 2, cx + r / 2, cy + r * 2)
+                canvas.drawRoundRect(rect, r, r, p)
+            }
+            else -> canvas.drawCircle(cx, cy, r, p)
+        }
     }
 
     fun drawWithAnimation(canvas: Canvas, value: Value, position: Int, cx: Int, cy: Int) {
@@ -51,13 +66,14 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                 pnt.color = when {
                     isT -> value.color; isR -> value.colorReverse; else -> ind.unselectedColor
                 }
-                canvas.drawCircle(cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), pnt)
+                drawShape(canvas, cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), pnt)
             }
 
             IndicatorAnimationType.SCALE, IndicatorAnimationType.SCALE_DOWN -> if (value is ScaleAnimationValue) {
                 pnt.color =
                     if (isT) value.color else if (isR) value.colorReverse else ind.unselectedColor
-                canvas.drawCircle(
+                drawShape(
+                    canvas,
                     cx.toFloat(),
                     cy.toFloat(),
                     if (isT) value.radius.toFloat() else if (isR) value.radiusReverse.toFloat() else ind.radius.toFloat(),
@@ -66,10 +82,11 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
             }
 
             IndicatorAnimationType.DROP -> if (value is DropAnimationValue) {
-                pnt.color = ind.unselectedColor; canvas.drawCircle(
-                    cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), pnt
+                pnt.color = ind.unselectedColor; drawShape(
+                    canvas, cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), pnt
                 ); pnt.color = ind.selectedColor
-                canvas.drawCircle(
+                drawShape(
+                    canvas,
                     (if (isH) value.width else value.height).toFloat(),
                     (if (isH) value.height else value.width).toFloat(),
                     value.radius.toFloat(),
@@ -78,10 +95,11 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
             }
 
             IndicatorAnimationType.SLIDE -> if (value is SlideAnimationValue) {
-                pnt.color = ind.unselectedColor; canvas.drawCircle(
-                    cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), pnt
+                pnt.color = ind.unselectedColor; drawShape(
+                    canvas, cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), pnt
                 ); pnt.color = ind.selectedColor
-                canvas.drawCircle(
+                drawShape(
+                    canvas,
                     if (isH) value.coordinate.toFloat() else cx.toFloat(),
                     if (isH) cy.toFloat() else value.coordinate.toFloat(),
                     ind.radius.toFloat(),
@@ -93,14 +111,14 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                 strokePaint.color = when {
                     isT -> value.color; isR -> value.colorReverse; else -> ind.unselectedColor
                 }
-                strokePaint.strokeWidth = ind.stroke.toFloat(); canvas.drawCircle(
-                    cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), strokePaint
+                strokePaint.strokeWidth = ind.stroke.toFloat(); drawShape(
+                    canvas, cx.toFloat(), cy.toFloat(), ind.radius.toFloat(), strokePaint
                 )
                 strokePaint.strokeWidth = (when {
                     isT -> value.stroke; isR -> value.strokeReverse; else -> ind.stroke
                 }).toFloat()
-                canvas.drawCircle(
-                    cx.toFloat(), cy.toFloat(), when {
+                drawShape(
+                    canvas, cx.toFloat(), cy.toFloat(), when {
                         isT -> value.radius.toFloat(); isR -> value.radiusReverse.toFloat(); else -> ind.radius.toFloat()
                     }, strokePaint
                 )
@@ -112,7 +130,8 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                 val cord =
                     if (isTargetSwap || position == ind.selectedPosition) value.coordinateReverse else value.coordinate
                 pnt.color = if (isTargetSwap) ind.selectedColor else ind.unselectedColor
-                canvas.drawCircle(
+                drawShape(
+                    canvas,
                     (if (isH) cord else cx).toFloat(),
                     (if (isH) cy else cord).toFloat(),
                     ind.radius.toFloat(),
@@ -128,8 +147,8 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                     if (isH) value.rectEnd.toFloat() else cx + r,
                     if (isH) cy + r else value.rectEnd.toFloat()
                 )
-                pnt.color = ind.unselectedColor; canvas.drawCircle(
-                    cx.toFloat(), cy.toFloat(), r, pnt
+                pnt.color = ind.unselectedColor; drawShape(
+                    canvas, cx.toFloat(), cy.toFloat(), r, pnt
                 ); pnt.color = ind.selectedColor; canvas.drawRoundRect(rect, r, r, pnt)
             }
 
@@ -142,8 +161,8 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                     if (isH) value.rectEnd.toFloat() else cx + h,
                     if (isH) cy + h else value.rectEnd.toFloat()
                 )
-                pnt.color = ind.unselectedColor; canvas.drawCircle(
-                    cx.toFloat(), cy.toFloat(), r, pnt
+                pnt.color = ind.unselectedColor; drawShape(
+                    canvas, cx.toFloat(), cy.toFloat(), r, pnt
                 ); pnt.color = ind.selectedColor; canvas.drawRoundRect(rect, r, r, pnt)
             }
 
