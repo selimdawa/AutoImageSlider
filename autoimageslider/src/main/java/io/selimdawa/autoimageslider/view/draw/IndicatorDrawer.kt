@@ -191,7 +191,6 @@ class IndicatorDrawer(private val indicator: Indicator) {
     }
 
     private fun drawThinWorm(canvas: Canvas, v: ThinWormAnimationValue) {
-        val r = indicator.radius.toFloat()
         val cy = CoordinatesUtils.getYCoordinate(indicator, 0).toFloat()
         val cx = CoordinatesUtils.getXCoordinate(indicator, 0).toFloat()
         val isH = indicator.orientation == Orientation.HORIZONTAL

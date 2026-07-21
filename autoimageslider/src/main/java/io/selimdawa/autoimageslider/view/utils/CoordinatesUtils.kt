@@ -50,7 +50,7 @@ object CoordinatesUtils {
     private fun getVerticalCoordinate(ind: Indicator) =
         if (ind.animationType == IndicatorAnimationType.DROP) ind.radius * 3 else ind.radius
 
-    fun getProgress(ind: Indicator, pos: Int, offset: Float, isRtl: Boolean): Pair<Int, Float> {
+    fun getProgress(ind: Indicator, pos: Int, offset: Float): Pair<Int, Float> {
         val count = ind.count
         if (count <= 0) return Pair(0, 0f)
 

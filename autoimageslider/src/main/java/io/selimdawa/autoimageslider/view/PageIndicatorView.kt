@@ -127,7 +127,7 @@ class PageIndicatorView @JvmOverloads constructor(
                     if (count <= 0) return
                     
                     val from = pos % count
-                    val progress = CoordinatesUtils.getProgress(indicator, pos, off, isRtl)
+                    val progress = CoordinatesUtils.getProgress(indicator, pos, off)
                     
                     // Stateless update: from is always pos, to is always pos + 1
                     indicator.selectedPosition = from
