@@ -147,8 +147,11 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                     if (isH) value.rectEnd.toFloat() else cx + r,
                     if (isH) cy + r else value.rectEnd.toFloat()
                 )
-                pnt.color = ind.unselectedColor; drawShape(
-                    canvas, cx.toFloat(), cy.toFloat(), r, pnt
+                pnt.color = ind.unselectedColor; canvas.drawCircle(
+                    cx.toFloat(),
+                    cy.toFloat(),
+                    r,
+                    pnt
                 ); pnt.color = ind.selectedColor; canvas.drawRoundRect(rect, r, r, pnt)
             }
 
@@ -161,8 +164,11 @@ class UniversalDrawer(paint: Paint, indicator: Indicator) : BaseDrawer(paint, in
                     if (isH) value.rectEnd.toFloat() else cx + h,
                     if (isH) cy + h else value.rectEnd.toFloat()
                 )
-                pnt.color = ind.unselectedColor; drawShape(
-                    canvas, cx.toFloat(), cy.toFloat(), r, pnt
+                pnt.color = ind.unselectedColor; canvas.drawCircle(
+                    cx.toFloat(),
+                    cy.toFloat(),
+                    r,
+                    pnt
                 ); pnt.color = ind.selectedColor; canvas.drawRoundRect(rect, r, r, pnt)
             }
 

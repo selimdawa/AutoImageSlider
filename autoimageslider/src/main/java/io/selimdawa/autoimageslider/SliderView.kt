@@ -1,11 +1,13 @@
 package io.selimdawa.autoimageslider
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.toColorInt
@@ -89,6 +91,8 @@ class SliderView : FrameLayout {
             scrollTimeInMillis = value * 1000
         }
 
+    var sliderAnimationDuration: Int = 400
+
     var currentPagePosition: Int
         get() = mViewPager2?.currentItem?.let {
             if (isInfiniteAdapter) (sliderAdapter as? InfinitePagerAdapter<*>)?.getRealPosition(
@@ -106,7 +110,59 @@ class SliderView : FrameLayout {
             if (isInfiniteAdapter) (adapter as? InfinitePagerAdapter<*>)?.getMiddlePosition(
                 value
             ) else value
-        pager.setCurrentItem(target ?: value, smoothScroll)
+
+        if (smoothScroll) {
+            pager.setCurrentItem(target ?: value, true)
+        } else {
+            pager.setCurrentItem(target ?: value, false)
+        }
+    }
+
+    private fun setCurrentItemWithDuration(
+        item: Int,
+        duration: Long,
+        interpolator: AccelerateDecelerateInterpolator = AccelerateDecelerateInterpolator()
+    ) {
+        val pager = mViewPager2 ?: return
+        if (duration <= 0 || pager.width <= 0) {
+            pager.setCurrentItem(item, true)
+            return
+        }
+
+        val pxToDrag: Int = (item - pager.currentItem) * pager.width
+        if (pxToDrag == 0) return
+
+        val animator = ValueAnimator.ofInt(0, pxToDrag)
+        var previousValue = 0
+
+        animator.addUpdateListener { valueAnimator ->
+            val currentValue = valueAnimator.animatedValue as Int
+            val currentPxToDrag = (currentValue - previousValue).toFloat()
+            if (pager.isFakeDragging) {
+                pager.fakeDragBy(-currentPxToDrag)
+            }
+            previousValue = currentValue
+        }
+
+        animator.addListener(object : android.animation.Animator.AnimatorListener {
+            override fun onAnimationStart(animation: android.animation.Animator) {
+                pager.beginFakeDrag()
+            }
+
+            override fun onAnimationEnd(animation: android.animation.Animator) {
+                if (pager.isFakeDragging) pager.endFakeDrag()
+            }
+
+            override fun onAnimationCancel(animation: android.animation.Animator) {
+                if (pager.isFakeDragging) pager.endFakeDrag()
+            }
+
+            override fun onAnimationRepeat(animation: android.animation.Animator) {}
+        })
+
+        animator.interpolator = interpolator
+        animator.duration = duration
+        animator.start()
     }
 
     var indicatorSelectedColor: Int
@@ -170,6 +226,7 @@ class SliderView : FrameLayout {
         context.withStyledAttributes(attrs, R.styleable.SliderView) {
             scrollTimeInSec = getInt(R.styleable.SliderView_sliderScrollTimeInSec, 2)
             autoCycleDirection = getInt(R.styleable.SliderView_sliderAutoCycleDirection, 0)
+            sliderAnimationDuration = getInt(R.styleable.SliderView_sliderAnimationDuration, 400)
             val autoCycleEnabled = getBoolean(R.styleable.SliderView_sliderAutoCycleEnabled, true)
             isAutoCycle =
                 getBoolean(R.styleable.SliderView_sliderStartAutoCycle, false) || autoCycleEnabled
@@ -185,7 +242,7 @@ class SliderView : FrameLayout {
                     )
                     indicatorRadius = getDimension(
                         R.styleable.SliderView_sliderIndicatorRadius,
-                        DensityUtils.dpToPx(6).toFloat()
+                        DensityUtils.dpToPx(4).toFloat()
                     ).toInt()
                     Log.d(
                         "SliderView",
@@ -193,7 +250,7 @@ class SliderView : FrameLayout {
                     )
                     padding = getDimension(
                         R.styleable.SliderView_sliderIndicatorPadding,
-                        DensityUtils.dpToPx(3).toFloat()
+                        DensityUtils.dpToPx(6).toFloat()
                     ).toInt()
                     val margin = getDimension(
                         R.styleable.SliderView_sliderIndicatorMargin,
@@ -322,26 +379,30 @@ class SliderView : FrameLayout {
 
     private fun slideNext() {
         val pager = mViewPager2 ?: return
-        val count = sliderAdapter?.itemCount ?: 0
+        val adapter = sliderAdapter
+        val count = adapter?.itemCount ?: 0
         if (count <= 1) return
 
         val nextPos = when (autoCycleDirection) {
             AUTO_CYCLE_DIRECTION_BACK_AND_FORTH -> {
                 val current = pager.currentItem
-                val adapter = sliderAdapter
-                val realCount = if (isInfiniteAdapter) (adapter as? InfinitePagerAdapter<*>)?.realCount ?: 0 else count
-                val realPos = if (isInfiniteAdapter) (adapter as? InfinitePagerAdapter<*>)?.getRealPosition(current) ?: 0 else current
+                val realCount =
+                    if (isInfiniteAdapter) (adapter as? InfinitePagerAdapter<*>)?.realCount
+                        ?: 0 else count
+                val realPos =
+                    if (isInfiniteAdapter) (adapter as? InfinitePagerAdapter<*>)?.getRealPosition(
+                        current
+                    ) ?: 0 else current
 
-                if (realPos <= 0) mFlagBackAndForth = true
-                else if (realPos >= realCount - 1) mFlagBackAndForth = false
-
+                if (realPos == 0) mFlagBackAndForth = true
+                if (realPos == realCount - 1) mFlagBackAndForth = false
                 current + (if (mFlagBackAndForth) 1 else -1)
             }
 
             AUTO_CYCLE_DIRECTION_LEFT -> pager.currentItem - 1
             else -> pager.currentItem + 1
         }
-        pager.setCurrentItem(nextPos, true)
+        setCurrentItemWithDuration(nextPos, sliderAnimationDuration.toLong())
     }
 
     @Suppress("unused")
@@ -352,7 +413,7 @@ class SliderView : FrameLayout {
     @Suppress("unused")
     fun slideToPreviousPosition() {
         val pager = mViewPager2 ?: return
-        pager.setCurrentItem(pager.currentItem - 1, true)
+        setCurrentItemWithDuration(pager.currentItem - 1, sliderAnimationDuration.toLong())
     }
 
     fun setIndicatorGravity(gravity: Int) = pagerIndicator?.let {

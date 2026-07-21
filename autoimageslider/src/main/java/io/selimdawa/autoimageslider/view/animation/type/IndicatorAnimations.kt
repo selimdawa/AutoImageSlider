@@ -283,19 +283,25 @@ open class WormAnimation(listener: ValueController.UpdateListener) :
     open fun with(coordinateStart: Int, coordinateEnd: Int, radius: Int, isRightSide: Boolean) =
         this.apply {
             if (hasChanges(coordinateStart, coordinateEnd, radius, isRightSide)) {
-                this@WormAnimation.coordinateStart =
-                    coordinateStart; this@WormAnimation.coordinateEnd = coordinateEnd
-                this@WormAnimation.radius = radius; this@WormAnimation.isRightSide = isRightSide
-                rectLeftEdge = coordinateStart - radius; rectRightEdge = coordinateStart + radius
-                wormValue.rectStart = rectLeftEdge; wormValue.rectEnd = rectRightEdge
-                val rect = createRectValues(isRightSide)
-                val halfDuration = animationDuration / 2
-                animator?.playSequentially(
-                    createWormAnimator(rect.fromX, rect.toX, halfDuration, false, wormValue),
-                    createWormAnimator(
-                        rect.reverseFromX, rect.reverseToX, halfDuration, true, wormValue
+                animator = createAnimator().apply {
+                    this@WormAnimation.coordinateStart = coordinateStart
+                    this@WormAnimation.coordinateEnd = coordinateEnd
+                    this@WormAnimation.radius = radius
+                    this@WormAnimation.isRightSide = isRightSide
+                    rectLeftEdge = coordinateStart - radius
+                    rectRightEdge = coordinateStart + radius
+                    wormValue.rectStart = rectLeftEdge
+                    wormValue.rectEnd = rectRightEdge
+                    val rect = createRectValues(isRightSide)
+                    val halfDuration = animationDuration / 2
+
+                    playSequentially(
+                        createWormAnimator(rect.fromX, rect.toX, halfDuration, false, wormValue),
+                        createWormAnimator(
+                            rect.reverseFromX, rect.reverseToX, halfDuration, true, wormValue
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -358,26 +364,31 @@ class ThinWormAnimation(listener: ValueController.UpdateListener) : WormAnimatio
     override fun with(coordinateStart: Int, coordinateEnd: Int, radius: Int, isRightSide: Boolean) =
         this.apply {
             if (hasChanges(coordinateStart, coordinateEnd, radius, isRightSide)) {
-                this@ThinWormAnimation.coordinateStart =
-                    coordinateStart; this@ThinWormAnimation.coordinateEnd = coordinateEnd
-                this@ThinWormAnimation.radius = radius; this@ThinWormAnimation.isRightSide =
-                    isRightSide
-                rectLeftEdge = coordinateStart - radius; rectRightEdge = coordinateStart + radius
-                thinWormValue.rectStart = rectLeftEdge; thinWormValue.rectEnd =
-                    rectRightEdge; thinWormValue.height = radius * 2
-                val rec = createRectValues(isRightSide)
-                val d = animationDuration
-                animator?.playTogether(
-                    createWormAnimator(
-                        rec.fromX, rec.toX, (d * 0.8).toLong(), false, thinWormValue
-                    ),
-                    createWormAnimator(
-                        rec.reverseFromX, rec.reverseToX, (d * 0.8).toLong(), true, thinWormValue
-                    ).apply { startDelay = (d * 0.2).toLong() },
-                    createHeightAnimator(radius * 2, radius, (d * 0.5).toLong()),
-                    createHeightAnimator(
-                        radius, radius * 2, (d * 0.5).toLong()
-                    ).apply { startDelay = (d * 0.5).toLong() })
+                animator = createAnimator().apply {
+                    this@ThinWormAnimation.coordinateStart = coordinateStart
+                    this@ThinWormAnimation.coordinateEnd = coordinateEnd
+                    this@ThinWormAnimation.radius = radius
+                    this@ThinWormAnimation.isRightSide = isRightSide
+                    rectLeftEdge = coordinateStart - radius
+                    rectRightEdge = coordinateStart + radius
+                    thinWormValue.rectStart = rectLeftEdge
+                    thinWormValue.rectEnd = thinWormValue.rectStart
+                    thinWormValue.height = radius * 2
+                    val rec = createRectValues(isRightSide)
+                    val d = animationDuration
+
+                    playTogether(
+                        createWormAnimator(
+                            rec.fromX, rec.toX, (d * 0.8).toLong(), false, thinWormValue
+                        ),
+                        createWormAnimator(
+                            rec.reverseFromX, rec.reverseToX, (d * 0.8).toLong(), true, thinWormValue
+                        ).apply { startDelay = (d * 0.2).toLong() },
+                        createHeightAnimator(radius * 2, radius, (d * 0.5).toLong()),
+                        createHeightAnimator(
+                            radius, radius * 2, (d * 0.5).toLong()
+                        ).apply { startDelay = (d * 0.5).toLong() })
+                }
             }
         }
 
@@ -445,6 +456,8 @@ class DropAnimation(listener: ValueController.UpdateListener) :
                     heightEnd; this@DropAnimation.radius = radius
                 val toRadius = (radius / 1.5).toInt()
                 val halfDuration = animationDuration / 2
+                
+                animator = createAnimator() // Create fresh set
                 animator?.play(
                     createValueAnimation(
                         heightStart, heightEnd, halfDuration, AnimationType.Height

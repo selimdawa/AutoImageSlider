@@ -50,18 +50,16 @@ object CoordinatesUtils {
     private fun getVerticalCoordinate(ind: Indicator) =
         if (ind.animationType == IndicatorAnimationType.DROP) ind.radius * 3 else ind.radius
 
-    fun getProgress(ind: Indicator, pos: Int, offset: Float, isRtl: Boolean): Pair<Int?, Float?> {
+    fun getProgress(ind: Indicator, pos: Int, offset: Float, isRtl: Boolean): Pair<Int, Float> {
         val count = ind.count
-        val selPos = ind.selectedPosition
-        val target =
-            (if (isRtl) (count - 1) - pos else pos).coerceIn(0, (count - 1).coerceAtLeast(0))
-
+        var selPos = ind.selectedPosition
+        val target = (if (isRtl) (count - 1) - pos else pos).coerceIn(0, (count - 1).coerceAtLeast(0))
+        if (target > selPos || (isRtl && target - 1 < selPos) || (!isRtl && target + 1 < selPos)) {
+            selPos = target; ind.selectedPosition = selPos
+        }
         val slideR = selPos == target && offset != 0f
-        val destination = if (slideR) (if (isRtl) target - 1 else target + 1) else target
-        val finalDestination = if (count > 0) (destination % count + count) % count else 0
-
         return Pair(
-            finalDestination,
+            if (slideR) (if (isRtl) target - 1 else target + 1) else target,
             (if (slideR) offset else 1 - offset).coerceIn(0f, 1f)
         )
     }

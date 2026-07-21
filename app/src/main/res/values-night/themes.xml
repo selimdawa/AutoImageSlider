@@ -1,8 +1,8 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.AutoImageSlider" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@color/white</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/dark</item>
+        <item name="android:windowLightStatusBar">false</item>
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/basic_night</item>

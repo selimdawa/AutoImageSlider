@@ -27,7 +27,7 @@ class PageIndicatorView @JvmOverloads constructor(
 
     private var manager = IndicatorManager(this)
     private var viewPager2: ViewPager2? = null
-    private var isInteractionEnabled = false
+    private var isInteractionEnabled = true
 
     init {
         if (id == NO_ID) id = generateViewId()
@@ -44,11 +44,9 @@ class PageIndicatorView @JvmOverloads constructor(
     private val onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageScrolled(pos: Int, off: Float, offPx: Int) {
             val ind = manager.indicator()
-            val adapter = viewPager2?.adapter
-            val realPos = (adapter as? InfinitePagerAdapter<*>)?.getRealPosition(pos) ?: pos
-            if (isViewMeasured && ind.isInteractiveAnimation && (ind.animationType != IndicatorAnimationType.NONE)) {
-                val progress = CoordinatesUtils.getProgress(ind, realPos, off, isRtl)
-                setProgress(progress.first ?: 0, progress.second ?: 0f)
+            if (isViewMeasured && ind.isInteractiveAnimation && ind.animationType != IndicatorAnimationType.NONE) {
+                val progress = CoordinatesUtils.getProgress(ind, pos, off, isRtl)
+                setProgress(progress.first, progress.second)
             }
         }
 
@@ -56,23 +54,12 @@ class PageIndicatorView @JvmOverloads constructor(
             val adapter = viewPager2?.adapter
             val realPos = (adapter as? InfinitePagerAdapter<*>)?.getRealPosition(pos) ?: pos
             val sel = if (isRtl) (count - 1) - realPos else realPos
-            val ind = manager.indicator()
-
-            if (ind.selectedPosition != sel) {
-                if (!ind.isInteractiveAnimation || viewPager2?.scrollState == ViewPager2.SCROLL_STATE_IDLE) {
-                    selection = sel
-                } else {
-                    ind.lastSelectedPosition = ind.selectedPosition
-                    ind.selectedPosition = sel
-                    ind.selectingPosition = sel
-                }
-            }
+            selection = sel
         }
 
         override fun onPageScrollStateChanged(state: Int) {
             if (state == ViewPager2.SCROLL_STATE_IDLE) {
                 manager.indicator().isInteractiveAnimation = isInteractionEnabled
-                updateState()
             }
         }
     }
@@ -150,6 +137,12 @@ class PageIndicatorView @JvmOverloads constructor(
     override fun onTouchEvent(ev: MotionEvent?) = true.also { manager.drawer().touch(ev) }
     override fun onIndicatorUpdated() = invalidate()
 
+    var isInteractiveAnimation: Boolean
+        get() = manager.indicator().isInteractiveAnimation
+        set(value) {
+            manager.indicator().isInteractiveAnimation = value
+        }
+
     fun setDynamicCount(dynamic: Boolean) {
         manager.indicator().isDynamicCount = dynamic
     }
@@ -212,10 +205,8 @@ class PageIndicatorView @JvmOverloads constructor(
         val finalProg = progress.coerceIn(0f, 1f)
 
         if (finalProg == 1f) {
-            if (ind.selectedPosition != finalPos) {
-                ind.lastSelectedPosition = ind.selectedPosition
-                ind.selectedPosition = finalPos
-            }
+            ind.lastSelectedPosition = ind.selectedPosition
+            ind.selectedPosition = finalPos
         }
         ind.selectingPosition = finalPos
         manager.animate().interactive(finalProg)

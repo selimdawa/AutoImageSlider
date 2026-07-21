@@ -17,7 +17,7 @@ class Indicator {
     var scaleFactor = 0f
     var unselectedColor = 0
     var selectedColor = 0
-    var isInteractiveAnimation = false
+    var isInteractiveAnimation = true
     var isAutoVisibility = false
     var isDynamicCount = false
     var animationDuration = 0L
@@ -40,7 +40,7 @@ class Indicator {
         const val DEFAULT_COUNT = 3
         const val MIN_COUNT = 1
         const val COUNT_NONE = -1
-        const val DEFAULT_RADIUS_DP = 6
-        const val DEFAULT_PADDING_DP = 8
+        const val DEFAULT_RADIUS_DP = 4
+        const val DEFAULT_PADDING_DP = 6
     }
 }

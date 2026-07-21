@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.imageSlider.apply {
             setSliderAdapter(this@MainActivity.adapter)
-            setIndicatorAnimation(IndicatorAnimationType.WORM)
+            setIndicatorAnimation(IndicatorAnimationType.DROP)
             setSliderTransformAnimation(SliderAnimations.SIMPLE)
             autoCycleDirection = SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH
             indicatorSelectedColor = ContextCompat.getColor(this@MainActivity, R.color.white)

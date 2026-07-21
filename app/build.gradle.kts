@@ -14,8 +14,6 @@ android {
         targetSdk = 37
         versionCode = 2
         versionName = "1.0.1"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -38,7 +36,6 @@ dependencies {
     implementation(project(":autoimageslider"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    testImplementation(libs.junit)
     //Layout
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
