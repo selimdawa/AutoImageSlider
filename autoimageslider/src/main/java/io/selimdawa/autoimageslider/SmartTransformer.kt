@@ -17,14 +17,16 @@ class SmartTransformer(private val animation: SliderAnimations) : ViewPager2.Pag
             SliderAnimations.CUBE_IN_DEPTH, SliderAnimations.CUBE_IN_ROTATION, SliderAnimations.CUBE_IN_SCALING,
             SliderAnimations.CUBE_OUT_DEPTH, SliderAnimations.CUBE_OUT_ROTATION, SliderAnimations.CUBE_OUT_SCALING,
             SliderAnimations.GATE -> {
-                page.alpha = if (inRange) 1f else 0f
-                if (inRange) {
-                    page.pivotX = if (position <= 0f) page.width.toFloat() else 0f
-                    page.rotationY =
-                        (if (position <= 0f) animation.rotationFactor else -animation.rotationFactor) * absPos
+                if (animation.isCubeIn || animation.isCubeOut) {
+                    page.alpha = if (inRange) 1f else 0f
+                    if (inRange) {
+                        page.pivotX = if (position <= 0f) page.width.toFloat() else 0f
+                        page.rotationY =
+                            (if (position <= 0f) animation.rotationFactor else -animation.rotationFactor) * absPos
+                    }
+                    if (animation.hasScaleY) page.scaleY =
+                        if (animation.scaleMode == 1) max(0.4f, 1f - absPos) else max(0.4f, absPos)
                 }
-                if (animation.hasScaleY) page.scaleY =
-                    if (animation.scaleMode == 1) max(0.4f, 1f - absPos) else max(0.4f, absPos)
             }
 
             SliderAnimations.ANTICLOCKWISE_SPIN, SliderAnimations.CLOCK_SPIN -> {

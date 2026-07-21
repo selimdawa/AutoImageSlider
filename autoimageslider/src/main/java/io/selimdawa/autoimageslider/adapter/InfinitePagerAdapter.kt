@@ -10,30 +10,17 @@ class InfinitePagerAdapter<VH : RecyclerView.ViewHolder>(
 
     init {
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onChanged() {
-                notifyDataSetChanged()
-            }
-
-            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
-                notifyDataSetChanged()
-            }
-
-            override fun onItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any?) {
-                notifyDataSetChanged()
-            }
-
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                notifyDataSetChanged()
-            }
-
-            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-                notifyDataSetChanged()
-            }
-
-            override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-                notifyDataSetChanged()
-            }
+            override fun onChanged() = refresh()
+            override fun onItemRangeChanged(p: Int, c: Int) = refresh()
+            override fun onItemRangeChanged(p: Int, c: Int, pay: Any?) = refresh()
+            override fun onItemRangeInserted(p: Int, c: Int) = refresh()
+            override fun onItemRangeRemoved(p: Int, c: Int) = refresh()
+            override fun onItemRangeMoved(f: Int, t: Int, c: Int) = refresh()
         })
+    }
+
+    private fun refresh() {
+        if (itemCount > 0) notifyItemRangeChanged(0, itemCount)
     }
 
     val realCount get() = adapter.itemCount
@@ -45,13 +32,14 @@ class InfinitePagerAdapter<VH : RecyclerView.ViewHolder>(
 
     fun getRealPosition(virtualPos: Int) = if (realCount > 0) virtualPos % realCount else 0
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         adapter.onCreateViewHolder(parent, viewType)
 
     override fun onBindViewHolder(holder: VH, position: Int) =
         adapter.onBindViewHolder(holder, getRealPosition(position))
 
     override fun getItemViewType(position: Int) = adapter.getItemViewType(getRealPosition(position))
+
     override fun getItemId(position: Int) = adapter.getItemId(getRealPosition(position))
 
     companion object {
