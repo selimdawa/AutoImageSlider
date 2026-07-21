@@ -9,7 +9,7 @@ enum class SliderAnimations(
     val hasScaleY: Boolean = false,
     val scaleMode: Int = 0
 ) {
-    ANTICLOCK_SPIN, CLOCK_SPIN, CUBE_IN_DEPTH(
+    ANTICLOCKWISE_SPIN, CLOCK_SPIN, CUBE_IN_DEPTH(
         cameraDist = 20000f, rotationFactor = 90f, isCubeIn = true, hasScaleY = true, scaleMode = 1
     ),
     CUBE_IN_ROTATION(

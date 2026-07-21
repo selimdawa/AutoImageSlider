@@ -18,11 +18,11 @@ import androidx.viewpager2.widget.ViewPager2
 import io.selimdawa.autoimageslider.adapter.DefaultSliderAdapter
 import io.selimdawa.autoimageslider.adapter.InfinitePagerAdapter
 import io.selimdawa.autoimageslider.view.PageIndicatorView
-import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
-import io.selimdawa.autoimageslider.view.draw.controller.DrawController
-import io.selimdawa.autoimageslider.view.draw.data.IndicatorShape
-import io.selimdawa.autoimageslider.view.draw.data.Orientation
-import io.selimdawa.autoimageslider.view.draw.data.RtlMode
+import io.selimdawa.autoimageslider.view.draw.IndicatorDrawer
+import io.selimdawa.autoimageslider.view.model.IndicatorAnimationType
+import io.selimdawa.autoimageslider.view.model.IndicatorShape
+import io.selimdawa.autoimageslider.view.model.Orientation
+import io.selimdawa.autoimageslider.view.model.RtlMode
 import io.selimdawa.autoimageslider.view.utils.DensityUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -426,7 +426,7 @@ class SliderView : FrameLayout {
         ); it.requestLayout()
     }
 
-    fun setOnIndicatorClickListener(l: DrawController.ClickListener?) =
+    fun setOnIndicatorClickListener(l: IndicatorDrawer.ClickListener?) =
         pagerIndicator?.setClickListener(l)
 
     override fun onAttachedToWindow() {

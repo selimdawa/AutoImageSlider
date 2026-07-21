@@ -7,8 +7,8 @@ import androidx.core.content.ContextCompat
 import com.flatcode.autoimageslider.databinding.ActivityMainBinding
 import io.selimdawa.autoimageslider.SliderAnimations
 import io.selimdawa.autoimageslider.SliderView
-import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
-import io.selimdawa.autoimageslider.view.draw.controller.DrawController
+import io.selimdawa.autoimageslider.view.draw.IndicatorDrawer
+import io.selimdawa.autoimageslider.view.model.IndicatorAnimationType
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.imageSlider.apply {
             setSliderAdapter(this@MainActivity.adapter)
-            setIndicatorAnimation(IndicatorAnimationType.DROP)
+            setIndicatorAnimation(IndicatorAnimationType.WORM)
             setSliderTransformAnimation(SliderAnimations.SIMPLE)
             autoCycleDirection = SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH
             indicatorSelectedColor = ContextCompat.getColor(this@MainActivity, R.color.white)
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             })
 
 
-            setOnIndicatorClickListener(object : DrawController.ClickListener {
+            setOnIndicatorClickListener(object : IndicatorDrawer.ClickListener {
                 override fun onIndicatorClicked(position: Int) {
                     Log.i("GGG", "onIndicatorClicked: $currentPagePosition")
                 }

@@ -1,9 +1,9 @@
 package io.selimdawa.autoimageslider.view.utils
 
 import android.util.Pair
-import io.selimdawa.autoimageslider.view.animation.type.IndicatorAnimationType
-import io.selimdawa.autoimageslider.view.draw.data.Indicator
-import io.selimdawa.autoimageslider.view.draw.data.Orientation
+import io.selimdawa.autoimageslider.view.model.Indicator
+import io.selimdawa.autoimageslider.view.model.IndicatorAnimationType
+import io.selimdawa.autoimageslider.view.model.Orientation
 
 object CoordinatesUtils {
     fun getCoordinate(ind: Indicator, pos: Int) =

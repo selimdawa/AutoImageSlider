@@ -13,20 +13,21 @@ class SmartTransformer(private val animation: SliderAnimations) : ViewPager2.Pag
         val inRange = position in -1f..1f
         if (animation.cameraDist > 0f) page.cameraDistance = animation.cameraDist
 
-        if (animation.isCubeIn || animation.isCubeOut) {
-            page.alpha = if (inRange) 1f else 0f
-            if (inRange) {
-                page.pivotX = if (position <= 0f) page.width.toFloat() else 0f
-                page.rotationY =
-                    (if (position <= 0f) animation.rotationFactor else -animation.rotationFactor) * absPos
-            }
-            if (animation.hasScaleY) page.scaleY =
-                if (animation.scaleMode == 1) max(0.4f, 1f - absPos) else max(0.4f, absPos)
-            return
-        }
-
         when (animation) {
-            SliderAnimations.ANTICLOCK_SPIN, SliderAnimations.CLOCK_SPIN -> {
+            SliderAnimations.CUBE_IN_DEPTH, SliderAnimations.CUBE_IN_ROTATION, SliderAnimations.CUBE_IN_SCALING,
+            SliderAnimations.CUBE_OUT_DEPTH, SliderAnimations.CUBE_OUT_ROTATION, SliderAnimations.CUBE_OUT_SCALING,
+            SliderAnimations.GATE -> {
+                page.alpha = if (inRange) 1f else 0f
+                if (inRange) {
+                    page.pivotX = if (position <= 0f) page.width.toFloat() else 0f
+                    page.rotationY =
+                        (if (position <= 0f) animation.rotationFactor else -animation.rotationFactor) * absPos
+                }
+                if (animation.hasScaleY) page.scaleY =
+                    if (animation.scaleMode == 1) max(0.4f, 1f - absPos) else max(0.4f, absPos)
+            }
+
+            SliderAnimations.ANTICLOCKWISE_SPIN, SliderAnimations.CLOCK_SPIN -> {
                 page.translationX = -position * page.width
                 page.visibility = if (absPos < 0.5f) View.VISIBLE else View.GONE
                 if (page.isVisible) {
@@ -34,7 +35,7 @@ class SmartTransformer(private val animation: SliderAnimations) : ViewPager2.Pag
                 }
                 page.alpha = if (inRange) 1f else 0f
                 if (inRange) page.rotation =
-                    (if (position <= 0f) 360f else -360f) * (if (animation == SliderAnimations.ANTICLOCK_SPIN) 1f - absPos else absPos)
+                    (if (position <= 0f) 360f else -360f) * (if (animation == SliderAnimations.ANTICLOCKWISE_SPIN) 1f - absPos else absPos)
             }
 
             SliderAnimations.DEPTH -> {
