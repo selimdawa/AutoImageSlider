@@ -95,10 +95,10 @@ class PageIndicatorView @JvmOverloads constructor(
                 ) ?: IndicatorShape.CIRCLE
 
                 radius = getDimension(
-                    R.styleable.PageIndicatorView_piv_radius, DensityUtils.dpToPx(6).toFloat()
+                    R.styleable.PageIndicatorView_piv_radius, DensityUtils.dpToPx(4).toFloat()
                 ).toInt()
                 padding = getDimension(
-                    R.styleable.PageIndicatorView_piv_padding, DensityUtils.dpToPx(8).toFloat()
+                    R.styleable.PageIndicatorView_piv_padding, DensityUtils.dpToPx(6).toFloat()
                 ).toInt()
                 scaleFactor =
                     getFloat(R.styleable.PageIndicatorView_piv_scaleFactor, 0.7f).coerceIn(
@@ -121,21 +121,37 @@ class PageIndicatorView @JvmOverloads constructor(
 
     private val onPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageScrolled(pos: Int, off: Float, offPx: Int) {
-            if (isViewMeasured && indicator.isInteractiveAnimation && indicator.animationType != IndicatorAnimationType.NONE) {
-                val progress = CoordinatesUtils.getProgress(indicator, pos, off, isRtl)
-                setProgress(progress.first, progress.second)
+            if (isViewMeasured && indicator.animationType != IndicatorAnimationType.NONE) {
+                if (indicator.isInteractiveAnimation) {
+                    val count = indicator.count
+                    if (count <= 0) return
+                    
+                    val from = pos % count
+                    val progress = CoordinatesUtils.getProgress(indicator, pos, off, isRtl)
+                    
+                    // Stateless update: from is always pos, to is always pos + 1
+                    indicator.selectedPosition = from
+                    setProgress(progress.first, progress.second)
+                }
             }
         }
 
         override fun onPageSelected(pos: Int) {
             val adapter = viewPager2?.adapter
             val realPos = (adapter as? InfinitePagerAdapter<*>)?.getRealPosition(pos) ?: pos
-            selection = if (isRtl) (count - 1) - realPos else realPos
+            val sel = if (isRtl) (count - 1) - realPos else realPos
+
+            if (viewPager2?.scrollState == ViewPager2.SCROLL_STATE_IDLE || !indicator.isInteractiveAnimation || indicator.animationType == IndicatorAnimationType.NONE) {
+                selection = sel
+            }
         }
 
         override fun onPageScrollStateChanged(state: Int) {
             if (state == ViewPager2.SCROLL_STATE_IDLE) {
                 indicator.isInteractiveAnimation = isInteractionEnabled
+                updateState()
+            } else if (state == ViewPager2.SCROLL_STATE_DRAGGING || state == ViewPager2.SCROLL_STATE_SETTLING) {
+                indicator.isInteractiveAnimation = true
             }
         }
     }
@@ -287,10 +303,7 @@ class PageIndicatorView @JvmOverloads constructor(
         if (!indicator.isInteractiveAnimation) return
         val finalPos = pos.coerceIn(0, maxOf(0, indicator.count - 1))
         val finalProg = progress.coerceIn(0f, 1f)
-        if (finalProg == 1f) {
-            indicator.lastSelectedPosition = indicator.selectedPosition
-            indicator.selectedPosition = finalPos
-        }
+        
         indicator.selectingPosition = finalPos
         animation.interactive(finalProg)
     }

@@ -14,7 +14,7 @@ enum class Orientation { HORIZONTAL, VERTICAL }
 enum class RtlMode { On, Off, Auto }
 
 enum class IndicatorAnimationType {
-    NONE, COLOR, SCALE, WORM, SLIDE, FILL, THIN_WORM, DROP, SWAP, SCALE_DOWN
+    NONE, COLOR, SCALE, WORM, SLIDE, FILL, THIN_WORM, DROP, SWAP, SCALE_DOWN, JUMP
 }
 
 // --- Data Classes ---
@@ -38,6 +38,8 @@ data class SwapAnimationValue(var coordinate: Int = 0, var coordinateReverse: In
 open class WormAnimationValue(var rectStart: Int = 0, var rectEnd: Int = 0) : Value
 
 data class ThinWormAnimationValue(var height: Int = 0) : WormAnimationValue()
+
+data class JumpAnimationValue(var coordinate: Int = 0, var radius: Int = 0) : Value
 
 // --- Core Indicator Data ---
 

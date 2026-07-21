@@ -11,6 +11,7 @@ import io.selimdawa.autoimageslider.view.model.DropAnimationValue
 import io.selimdawa.autoimageslider.view.model.FillAnimationValue
 import io.selimdawa.autoimageslider.view.model.Indicator
 import io.selimdawa.autoimageslider.view.model.IndicatorAnimationType
+import io.selimdawa.autoimageslider.view.model.JumpAnimationValue
 import io.selimdawa.autoimageslider.view.model.Orientation
 import io.selimdawa.autoimageslider.view.model.ScaleAnimationValue
 import io.selimdawa.autoimageslider.view.model.SlideAnimationValue
@@ -32,6 +33,10 @@ class AnimationManager(private val indicator: Indicator, private val listener: U
     private var runningAnimation: BaseAnimation<*>? = null
     private var progress = 0f
     private var isInteractive = false
+    
+    private var lastType: IndicatorAnimationType? = null
+    private var lastFrom: Int = -1
+    private var lastTo: Int = -1
 
     fun basic() {
         isInteractive = false; progress = 0f; animate()
@@ -44,13 +49,24 @@ class AnimationManager(private val indicator: Indicator, private val listener: U
     fun end() = runningAnimation?.end()
 
     private fun animate() {
-        end()
         val (from, to) = getTargetCoordinates()
+        val type = indicator.animationType
+        
+        // Reuse animation if possible
+        if (runningAnimation != null && lastType == type && lastFrom == from && lastTo == to) {
+            if (isInteractive) runningAnimation?.progress(progress) else runningAnimation?.start()
+            return
+        }
+
+        end()
+        lastType = type; lastFrom = from; lastTo = to
         val duration = indicator.animationDuration
 
-        runningAnimation = when (indicator.animationType) {
-            IndicatorAnimationType.COLOR -> ColorAnimation(listener)
-                .with(indicator.unselectedColor, indicator.selectedColor)
+        runningAnimation = when (type) {
+            IndicatorAnimationType.COLOR -> ColorAnimation(listener).with(
+                indicator.unselectedColor,
+                indicator.selectedColor
+            )
 
             IndicatorAnimationType.SCALE -> ScaleAnimation(listener).with(
                 indicator.unselectedColor,
@@ -59,8 +75,12 @@ class AnimationManager(private val indicator: Indicator, private val listener: U
                 indicator.scaleFactor
             )
 
-            IndicatorAnimationType.WORM -> WormAnimation(listener)
-                .with(from, to, indicator.radius, to > from)
+            IndicatorAnimationType.WORM -> WormAnimation(listener).with(
+                from,
+                to,
+                indicator.radius,
+                to > from
+            )
 
             IndicatorAnimationType.SLIDE -> SlideAnimation(listener).with(from, to)
 
@@ -71,11 +91,16 @@ class AnimationManager(private val indicator: Indicator, private val listener: U
                 indicator.stroke
             )
 
-            IndicatorAnimationType.THIN_WORM -> ThinWormAnimation(listener)
-                .with(from, to, indicator.radius, to > from)
+            IndicatorAnimationType.THIN_WORM -> ThinWormAnimation(listener).with(
+                from,
+                to,
+                indicator.radius,
+                to > from
+            )
 
             IndicatorAnimationType.DROP -> DropAnimation(listener).with(
-                from, to,
+                from,
+                to,
                 indicator.radius * 3 + (if (indicator.orientation == Orientation.HORIZONTAL) indicator.paddingTop else indicator.paddingLeft),
                 indicator.radius + (if (indicator.orientation == Orientation.HORIZONTAL) indicator.paddingTop else indicator.paddingLeft),
                 indicator.radius
@@ -89,6 +114,8 @@ class AnimationManager(private val indicator: Indicator, private val listener: U
                 indicator.radius,
                 indicator.scaleFactor
             )
+
+            IndicatorAnimationType.JUMP -> JumpAnimation(listener).with(from, to, indicator.radius)
 
             else -> {
                 listener.onValueUpdated(null); null
@@ -104,8 +131,7 @@ class AnimationManager(private val indicator: Indicator, private val listener: U
         val toPos =
             if (indicator.isInteractiveAnimation) indicator.selectingPosition else indicator.selectedPosition
         return CoordinatesUtils.getCoordinate(indicator, fromPos) to CoordinatesUtils.getCoordinate(
-            indicator,
-            toPos
+            indicator, toPos
         )
     }
 }
@@ -169,7 +195,8 @@ class FillAnimation(listener: UpdateListener) : ColorAnimation(listener) {
     fun with(cStart: Int, cEnd: Int, r: Int, s: Int) = this.apply {
         with(cStart, cEnd); radius = r; stroke = s
         animator?.setValues(
-            createHolder(false), createHolder(true),
+            createHolder(false),
+            createHolder(true),
             createIntHolder("RADIUS", radius, radius / 2, false),
             createIntHolder("RADIUS", radius, radius / 2, true),
             createIntHolder("STROKE", 0, radius, false),
@@ -177,12 +204,11 @@ class FillAnimation(listener: UpdateListener) : ColorAnimation(listener) {
         )
     }
 
-    private fun createIntHolder(name: String, start: Int, end: Int, rev: Boolean): PropertyValuesHolder =
-        PropertyValuesHolder.ofInt(
-            if (rev) "${name}_REVERSE" else name,
-            if (rev) end else start,
-            if (rev) start else end
-        )
+    private fun createIntHolder(
+        name: String, start: Int, end: Int, rev: Boolean
+    ): PropertyValuesHolder = PropertyValuesHolder.ofInt(
+        if (rev) "${name}_REVERSE" else name, if (rev) end else start, if (rev) start else end
+    )
 
     override fun createAnimator(): ValueAnimator = super.createAnimator().apply {
         addUpdateListener {
@@ -222,11 +248,12 @@ open class ScaleAnimation(listener: UpdateListener) : ColorAnimation(listener) {
         }
     }
 
-    protected open fun createScaleHolder(rev: Boolean): PropertyValuesHolder = PropertyValuesHolder.ofInt(
-        if (rev) "SCALE_REVERSE" else "SCALE",
-        if (rev) radius else (radius * scaleFactor).toInt(),
-        if (rev) (radius * scaleFactor).toInt() else radius
-    )
+    protected open fun createScaleHolder(rev: Boolean): PropertyValuesHolder =
+        PropertyValuesHolder.ofInt(
+            if (rev) "SCALE_REVERSE" else "SCALE",
+            if (rev) radius else (radius * scaleFactor).toInt(),
+            if (rev) (radius * scaleFactor).toInt() else radius
+        )
 }
 
 class ScaleDownAnimation(listener: UpdateListener) : ScaleAnimation(listener) {
@@ -288,6 +315,8 @@ open class WormAnimation(listener: UpdateListener) : BaseAnimation<AnimatorSet?>
 
     open fun with(cStart: Int, cEnd: Int, r: Int, right: Boolean) = this.apply {
         coordinateStart = cStart; coordinateEnd = cEnd; radius = r; isRightSide = right
+        wormValue.rectStart = cStart - r
+        wormValue.rectEnd = cStart + r
         animator = createAnimator().apply {
             val rect = if (right) RectValues(cStart + r, cEnd + r, cStart - r, cEnd - r)
             else RectValues(cStart - r, cEnd - r, cStart + r, cEnd + r)
@@ -329,21 +358,17 @@ class ThinWormAnimation(listener: UpdateListener) : WormAnimation(listener) {
     private val thinValue = ThinWormAnimationValue()
     override fun with(cStart: Int, cEnd: Int, r: Int, right: Boolean) = this.apply {
         coordinateStart = cStart; coordinateEnd = cEnd; radius = r; isRightSide = right
+        thinValue.rectStart = cStart - r
+        thinValue.rectEnd = cStart + r
+        thinValue.height = r * 2
         animator = createAnimator().apply {
             val rect = if (right) RectValues(cStart + r, cEnd + r, cStart - r, cEnd - r)
             else RectValues(cStart - r, cEnd - r, cStart + r, cEnd + r)
             val d = animationDuration
             playTogether(
-                createThinAnim(rect.from, rect.to, (d * 0.8).toLong(), 0, false),
-                createThinAnim(
-                    rect.revFrom,
-                    rect.revTo,
-                    (d * 0.8).toLong(),
-                    (d * 0.2).toLong(),
-                    true
-                ),
-                createHeightAnim(r * 2, r, d / 2, 0),
-                createHeightAnim(r, r * 2, d / 2, d / 2)
+                createThinAnim(rect.from, rect.to, (d * 0.8).toLong(), 0, false), createThinAnim(
+                    rect.revFrom, rect.revTo, (d * 0.8).toLong(), (d * 0.2).toLong(), true
+                ), createHeightAnim(r * 2, r, d / 2, 0), createHeightAnim(r, r * 2, d / 2, d / 2)
             )
         }
     }
@@ -389,9 +414,7 @@ class DropAnimation(listener: UpdateListener) : BaseAnimation<AnimatorSet?>(list
         animator = createAnimator().apply {
             play(createAnim(hS, hE, half) { value.height = it }).with(
                 createAnim(
-                    r,
-                    (r / 1.5).toInt(),
-                    half
+                    r, (r / 1.5).toInt(), half
                 ) { value.radius = it })
                 .with(createAnim(wS, wE, animationDuration) { value.width = it })
                 .before(createAnim(hE, hS, half) { value.height = it })
@@ -411,5 +434,27 @@ class DropAnimation(listener: UpdateListener) : BaseAnimation<AnimatorSet?>(list
             val anim = it as ValueAnimator
             anim.currentPlayTime = playTime.coerceIn(0, anim.duration)
         }
+    }
+}
+
+class JumpAnimation(listener: UpdateListener) : BaseAnimation<ValueAnimator?>(listener) {
+    private val value = JumpAnimationValue()
+    override fun createAnimator(): ValueAnimator = ValueAnimator().apply {
+        interpolator = AccelerateDecelerateInterpolator()
+        addUpdateListener {
+            value.coordinate = it.getAnimatedValue("C") as Int
+            value.radius = it.getAnimatedValue("R") as Int
+            listener?.onValueUpdated(value)
+        }
+    }
+
+    override fun progress(progress: Float) =
+        this.apply { animator?.currentPlayTime = (progress * animationDuration).toLong() }
+
+    fun with(start: Int, end: Int, radius: Int) = this.apply {
+        animator?.setValues(
+            PropertyValuesHolder.ofInt("C", start, end),
+            PropertyValuesHolder.ofInt("R", 0, radius, 0)
+        )
     }
 }

@@ -52,15 +52,12 @@ object CoordinatesUtils {
 
     fun getProgress(ind: Indicator, pos: Int, offset: Float, isRtl: Boolean): Pair<Int, Float> {
         val count = ind.count
-        var selPos = ind.selectedPosition
-        val target = (if (isRtl) (count - 1) - pos else pos).coerceIn(0, (count - 1).coerceAtLeast(0))
-        if (target > selPos || (isRtl && target - 1 < selPos) || (!isRtl && target + 1 < selPos)) {
-            selPos = target; ind.selectedPosition = selPos
-        }
-        val slideR = selPos == target && offset != 0f
-        return Pair(
-            if (slideR) (if (isRtl) target - 1 else target + 1) else target,
-            (if (slideR) offset else 1 - offset).coerceIn(0f, 1f)
-        )
+        if (count <= 0) return Pair(0, 0f)
+
+        // ViewPager2 always reports 'pos' as the left-most visible page.
+        // The two dots involved in the current transition are always 'pos' and 'pos + 1'.
+        val to = (pos + 1) % count
+        
+        return Pair(to, offset.coerceIn(0f, 1f))
     }
 }
