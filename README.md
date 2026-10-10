@@ -38,9 +38,9 @@
 
 Add the dependency:
 
-```gradle
+```kotlin
 dependencies {
-    implementation("io.selimdawa:auto-image-slider:VERSION")
+    implementation("io.github.selimdawa:auto-image-slider:1.0.1")
 }
 ```
 
@@ -52,14 +52,14 @@ Add the version:
 
 ```toml
 [versions]
-autoImageSlider = "VERSION"
+autoImageSlider = "1.0.1"
 ```
 
 Add the library:
 
 ```toml
 [libraries]
-auto-image-slider = { module = "io.selimdawa:auto-image-slider", version.ref = "autoImageSlider" }
+auto-image-slider = { module = "io.github.selimdawa:auto-image-slider", version.ref = "autoImageSlider" }
 ```
 
 Then use it in your module `build.gradle.kts`:
@@ -74,37 +74,45 @@ dependencies {
 
 ## 🚀 Usage
 
-### Add AutoImageSlider to your layout
+### Add SliderView to your layout
 
-Add the `AutoImageSlider` view to your XML layout:
+Add the `SliderView` to your XML layout:
 
 ```xml
-<com.selimdawa.autoimageslider.AutoImageSlider
-    android:id="@+id/autoImageSlider"
+<io.selimdawa.autoimageslider.SliderView
+    android:id="@+id/imageSlider"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+    android:layout_height="300dp"
+    app:sliderAnimationDuration="600"
+    app:sliderAutoCycleDirection="back_and_forth"
+    app:sliderAutoCycleEnabled="true"
+    app:sliderIndicatorAnimationDuration="600"
+    app:sliderIndicatorGravity="center_horizontal|bottom"
+    app:sliderIndicatorMargin="15dp"
+    app:sliderIndicatorOrientation="horizontal"
+    app:sliderIndicatorPadding="3dp"
+    app:sliderIndicatorRadius="2dp"
+    app:sliderIndicatorSelectedColor="@color/white"
+    app:sliderIndicatorUnselectedColor="@color/gray"
+    app:sliderScrollTimeInSec="1"
+    app:sliderStartAutoCycle="true" />
 ```
 
 Initialize the slider in your Activity or Fragment:
 
 ```kotlin
-val autoImageSlider = findViewById<AutoImageSlider>(R.id.autoImageSlider)
+val sliderView = findViewById<SliderView>(R.id.imageSlider)
 ```
 
 ---
 
-## 🖼️ Set Images
+## 🖼️ Set Adapter
 
-Add your images to the slider:
+Create your custom adapter extending `SliderViewAdapter` and set it:
 
 ```kotlin
-autoImageSlider.setImages(
-    listOf(
-        R.drawable.image_one,
-        R.drawable.image_two,
-        R.drawable.image_three
-    )
-)
+val adapter = SliderAdapterExample(this)
+sliderView.setSliderAdapter(adapter)
 ```
 
 ---
@@ -114,41 +122,48 @@ autoImageSlider.setImages(
 Customize the slider behavior:
 
 ```kotlin
-autoImageSlider.startAutoSlide()
+sliderView.setIndicatorAnimation(IndicatorAnimationType.WORM)
+sliderView.setSliderTransformAnimation(SliderAnimations.SIMPLE)
+sliderView.autoCycleDirection = SliderView.AUTO_CYCLE_DIRECTION_BACK_AND_FORTH
+sliderView.scrollTimeInSec = 3
+sliderView.isAutoCycle = true
+
+// Start auto cycle
+sliderView.startAutoCycle()
 ```
 
 Stop automatic sliding:
 
 ```kotlin
-autoImageSlider.stopAutoSlide()
+sliderView.stopAutoCycle()
 ```
 
 ---
 
 ## 🎨 Customization
 
-AutoImageSlider provides flexible options to match your application design.
+`SliderView` provides flexible options to match your application design.
 
-### Change Slide Duration
+### Change Scroll Duration
 
 ```kotlin
-autoImageSlider.slideDuration = 3000L
+sliderView.scrollTimeInSec = 3
 ```
 
 ---
 
-### Enable Auto Sliding
+### Enable Auto Cycle
 
 ```kotlin
-autoImageSlider.isAutoSlideEnabled = true
+sliderView.isAutoCycle = true
 ```
 
 ---
 
-### Disable Auto Sliding
+### Disable Auto Cycle
 
 ```kotlin
-autoImageSlider.isAutoSlideEnabled = false
+sliderView.isAutoCycle = false
 ```
 
 ---
@@ -156,23 +171,7 @@ autoImageSlider.isAutoSlideEnabled = false
 ### Change Animation Duration
 
 ```kotlin
-autoImageSlider.animationDuration = 500L
-```
-
----
-
-### Customize Indicators
-
-Change indicator appearance:
-
-```kotlin
-autoImageSlider.showIndicators = true
-```
-
-Hide indicators:
-
-```kotlin
-autoImageSlider.showIndicators = false
+sliderView.sliderAnimationDuration = 500
 ```
 
 ---
