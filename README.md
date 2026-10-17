@@ -15,6 +15,16 @@
  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-CC9900?logo=apache&logoColor=white"/></a>
 </p>
 
+## Day Mode
+One | Two | Three 
+--- | --- | --- | 
+![](UI/1.jpg) | ![](UI/2.jpg) | ![](UI/3.gif) | 
+
+## Night Mode
+One | Two | Three 
+--- | --- | --- | 
+![](UI/4.jpg) | ![](UI/5.jpg) | ![](UI/6.gif) | 
+
 ---
 
 ## ✨ Features
@@ -40,7 +50,7 @@ Add the dependency:
 
 ```kotlin
 dependencies {
-    implementation("io.github.selimdawa:auto-image-slider:1.0.1")
+    implementation("io.github.selimdawa:auto-image-slider:x.y.z")
 }
 ```
 
@@ -52,7 +62,7 @@ Add the version:
 
 ```toml
 [versions]
-autoImageSlider = "1.0.1"
+autoImageSlider = "x.y.z"
 ```
 
 Add the library:
