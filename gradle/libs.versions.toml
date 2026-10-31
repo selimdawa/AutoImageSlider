@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.1"
+agp = "9.5.0"
 coreKtx = "1.19.1"
 coil = "2.7.0"
 viewpager2 = "1.1.0"
